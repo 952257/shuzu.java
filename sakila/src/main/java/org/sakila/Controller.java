@@ -36,7 +36,7 @@ public class Controller {
             System.out.println("========================================");
             System.out.println("数据库连接失败，无法进入系统管理界面。");
             System.out.println("请检查：");
-            System.out.println("  1. MySQL 服务是否已启动");
+            System.out.println("  1. MySQL 的服务是否已启动");
             System.out.println("  2. 库是否已创建并导入数据");
             System.out.println("  3. DBInfo 中的地址、用户名、密码是否正确");
             System.out.println("  4. 是否已添加 mysql-connector-j 驱动");
