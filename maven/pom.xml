@@ -10,6 +10,11 @@
     <packaging>pom</packaging>
     <modules>
         <module>demo</module>
+        <module>m2</module>
+        <module>m3</module>
+        <module>m4</module>
+        <module>m5</module>
+        <module>m1</module>
     </modules>
 
     <properties>
