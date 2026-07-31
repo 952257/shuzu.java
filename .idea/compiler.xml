@@ -14,6 +14,7 @@
         <module name="m5" />
         <module name="m6" />
         <module name="demo" />
+        <module name="springboot-demo" />
         <module name="Atm" />
       </profile>
     </annotationProcessing>
@@ -24,5 +25,11 @@
       <module name="m1" target="17" />
       <module name="m6 (1)" target="1.8" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="springboot" options="" />
+      <module name="springboot-demo" options="-parameters" />
+    </option>
   </component>
 </project>

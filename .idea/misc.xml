@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/Atm/pom.xml" />
         <option value="$PROJECT_DIR$/sakila/pom.xml" />
         <option value="$PROJECT_DIR$/maven/pom.xml" />
+        <option value="$PROJECT_DIR$/springboot/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
