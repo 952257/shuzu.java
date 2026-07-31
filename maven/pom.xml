@@ -25,5 +25,13 @@
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <dependencies>
+        <!-- 达梦数据库 JDBC 驱动依赖 -->
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver11</artifactId>
+            <version>8.1.1.192</version>
+        </dependency>
+    </dependencies>
 
 </project>
