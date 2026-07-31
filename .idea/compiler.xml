@@ -12,13 +12,17 @@
         <module name="sakila" />
         <module name="m4" />
         <module name="m5" />
-        <module name="Atm" />
+        <module name="m6" />
         <module name="demo" />
+        <module name="Atm" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="atm" target="25" />
+      <module name="m" target="25" />
+      <module name="m-all (1)" target="1.8" />
       <module name="m1" target="17" />
+      <module name="m6 (1)" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
