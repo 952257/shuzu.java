@@ -19,6 +19,7 @@
 
     <modules>
         <module>springboot-demo</module>
+        <module>springboot-web</module>
     </modules>
 
     <properties>
