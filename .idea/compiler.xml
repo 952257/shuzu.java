@@ -2,10 +2,12 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="springboot-demo" />
         <module name="m2" />
         <module name="m1 (1)" />
         <module name="m3" />
@@ -13,9 +15,8 @@
         <module name="m4" />
         <module name="m5" />
         <module name="m6" />
-        <module name="demo" />
-        <module name="springboot-demo" />
         <module name="Atm" />
+        <module name="demo" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
