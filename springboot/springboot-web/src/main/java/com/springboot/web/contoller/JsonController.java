@@ -1,5 +1,7 @@
 package com.springboot.web.contoller;
 
+import com.springboot.web.common.ServiceException;
+import com.springboot.web.common.ServiceExceptionEnum;
 import com.springboot.web.dto.UserDto;
 import com.springboot.web.vo.UserVo;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,11 @@ public class JsonController{
      * }
      */
     public UserVo test1(){
+        try {
+            System.out.println(1 / 0);
+        }catch (Exception e){
+            throw new ServiceException(ServiceExceptionEnum.YOU_ARE_TWO_B);
+        }
         return new UserVo(1,"aaa",new Date(),false);
     }
     // @ResponseBody还可以用在handler的返回值上
