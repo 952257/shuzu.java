@@ -68,23 +68,18 @@ public class FilmController {
         return new CommonResult<>();
     }
 
-    @PutMapping({"", "/{id}"})
-    public CommonResult<Void> updateOne(@PathVariable(required = false) Integer id,
-                                        @RequestParam(value = "filmid", required = false) Integer filmId,
+    @PutMapping
+    public CommonResult<Void> updateOne(@RequestParam(value = "filmid") Integer filmId,
                                         @RequestBody FilmDto filmDto) {
-        Integer targetId = id != null ? id : filmId;
-        if (targetId == null) {
-            throw new ServiceException(ServiceExceptionEnum.MISSING_REQUEST_PARAM_ERROR);
-        }
-        log.info("id is {}", targetId);
+        log.info("id is {}", filmId);
         log.info("filmDto is {}", filmDto);
-        boolean exists = list.stream().anyMatch(f -> f.getFilmId().equals(targetId));
+        boolean exists = list.stream().anyMatch(f -> f.getFilmId().equals(filmId));
         if (!exists) {
             throw new ServiceException(ServiceExceptionEnum.FILM_NOT_EXIST);
         }
-        list.stream().filter(f -> f.getFilmId().equals(targetId))
+        list.stream().filter(f -> f.getFilmId().equals(filmId))
                 .findFirst().ifPresent(po -> {
-                    po.setFilmId(targetId);
+                    po.setFilmId(filmId);
                     po.setTitle(filmDto.getTitle());
                     po.setDescription(filmDto.getDescription());
                     po.setReleaseYear(filmDto.getReleaseYear());

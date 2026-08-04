@@ -165,7 +165,6 @@ List<Film> list = new ArrayList<>();
 
 - `GET /film/{id}`：按 id 查询影片
 - `POST /film`：新增影片
-- `PUT /film/{id}`：按路径参数修改影片
 - `PUT /film?filmid=1`：按查询参数修改影片
 - `DELETE /film/{id}`：删除影片
 - `GET /film/queryByCondition`：按条件查询影片列表
@@ -234,37 +233,31 @@ List<Film> list = new ArrayList<>();
 - `addOne()` -> `list.add(...)`
 - `addOne()` -> `new CommonResult<>()`
 
-### 5.3 修改影片：`PUT /film/{id}` 或 `PUT /film?filmid=1`
+### 5.3 修改影片：`PUT /film?filmid=1`
 
-对应方法：`updateOne(Integer id, Integer filmId, FilmDto filmDto)`
+对应方法：`updateOne(Integer filmId, FilmDto filmDto)`
 
-这个接口支持两种传参方式：
+这个接口只支持一种传参方式：
 
-- 路径参数：`/film/1`
-- 查询参数：`/film?filmid=1`
+- 查询参数：`PUT /film?filmid=1`
+- 请求体：`FilmDto` JSON
 
-代码里会先确定最终要修改的 id：
-
-- 如果路径变量 `id` 不为空，优先用 `id`
-- 否则使用查询参数 `filmid`
+`filmid` 为必传查询参数，不支持 `/film/{id}` 这种路径参数写法。
 
 流程：
 
-1. Spring 绑定路径参数或查询参数
+1. Spring 绑定查询参数 `filmid`
 2. Spring 将请求体 JSON 转成 `FilmDto`
 3. 进入 `updateOne`
-4. 计算最终 id：`targetId = id != null ? id : filmId`
-5. 如果 `targetId` 为空，抛出参数缺失异常
-6. 先用 `list.stream().anyMatch(...)` 判断影片是否存在
-7. 如果不存在，抛出 `FILM_NOT_EXIST`
-8. 如果存在，再用 `list.stream().filter(...).findFirst().ifPresent(...)` 找到影片
-9. 在 `ifPresent` 代码块里逐个调用 `setXxx(...)` 更新字段
-10. 如果 `lastUpdate` 没传，则自动设置成当前时间
-11. 返回空的 `CommonResult<Void>`
+4. 先用 `list.stream().anyMatch(...)` 判断影片是否存在
+5. 如果不存在，抛出 `FILM_NOT_EXIST`
+6. 如果存在，再用 `list.stream().filter(...).findFirst().ifPresent(...)` 找到影片
+7. 在 `ifPresent` 代码块里逐个调用 `setXxx(...)` 更新字段
+8. 如果 `lastUpdate` 没传，则自动设置成当前时间
+9. 返回空的 `CommonResult<Void>`
 
 内部调用关系：
 
-- `updateOne()` -> 计算 `targetId`
 - `updateOne()` -> `list.stream().anyMatch(...)`
 - `updateOne()` -> `list.stream().filter(...).findFirst().ifPresent(...)`
 - `updateOne()` -> 多个 `po.setXxx(...)`
@@ -377,15 +370,14 @@ CommonResult 错误响应
 
 执行链路：
 
-1. 请求进入 `/film`
+1. 请求进入 `/film?filmid=1`
 2. Spring 读取查询参数 `filmid=1`
 3. Spring 把请求体转成 `FilmDto`
-4. 进入 `updateOne(null, 1, filmDto)`
-5. 代码得到 `targetId = 1`
-6. 检查 `list` 中是否存在 `filmId = 1`
-7. 找到后进入 `ifPresent(...)`
-8. 把 `FilmDto` 中的值逐个 set 到目标 `Film`
-9. 返回成功结果
+4. 进入 `updateOne(1, filmDto)`
+5. 检查 `list` 中是否存在 `filmId = 1`
+6. 找到后进入 `ifPresent(...)`
+7. 把 `FilmDto` 中的值逐个 set 到目标 `Film`
+8. 返回成功结果
 
 ## 8. 当前代码的特点和局限
 
