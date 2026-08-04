@@ -15,7 +15,9 @@ public enum ServiceExceptionEnum {
     // ========== 用户模块 ==========
     USER_NOT_FOUND(1001002000, "用户不存在"),
 
-    YOU_ARE_TWO_B(22222,"你是个2b");
+    YOU_ARE_TWO_B(22222,"你是个2b"),
+
+    PERSON_NOT_EXIST(2001001001,"此人不存在");
 
     // ========== 订单模块 ==========
 
