@@ -17,7 +17,9 @@ public enum ServiceExceptionEnum {
 
     YOU_ARE_TWO_B(22222,"你是个2b"),
 
-    PERSON_NOT_EXIST(2001001001,"此人不存在");
+    PERSON_NOT_EXIST(2001001001,"此人不存在"),
+
+    FILM_NOT_EXIST(2001001002,"此影片不存在");
 
     // ========== 订单模块 ==========
 

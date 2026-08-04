@@ -26,6 +26,7 @@
       <module name="m-all (1)" target="1.8" />
       <module name="m1" target="17" />
       <module name="m6 (1)" target="1.8" />
+      <module name="springboot (1)" target="1.5" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
