@@ -1,5 +1,6 @@
 package com.springboot.web.common.po;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ public class Person {
     private String name;
     private double height;
     private Integer sex;
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date birthday;
 
 }
