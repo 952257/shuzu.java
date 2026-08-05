@@ -14,7 +14,7 @@ public class DBInfo {
             + "&useUnicode=true&characterEncoding=UTF-8"
             + "&serverTimezone=GMT%2B8";
     public static final String USERNAME = "root";
-    public static final String PASSWORD = "12345678";
+    public static final String PASSWORD = "hjx127307";
 
     static {
         try {

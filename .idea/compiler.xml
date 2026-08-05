@@ -16,6 +16,7 @@
         <module name="m5" />
         <module name="springboot-web" />
         <module name="m6" />
+        <module name="springboot-mybatis" />
         <module name="Atm" />
         <module name="demo" />
       </profile>
@@ -33,6 +34,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="springboot" options="" />
       <module name="springboot-demo" options="-parameters" />
+      <module name="springboot-mybatis" options="-parameters" />
       <module name="springboot-web" options="-parameters" />
     </option>
   </component>
