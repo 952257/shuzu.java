@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,5 +54,27 @@ public class MyBatisTest {
     public void testSelectUsersByKeyword(){
         List<User> users = userMapper.selectUsersByKeyword("c");
         log.info("users is {}", users);
+    }
+
+
+    @Test
+    public void testUpdateUser(){
+        User user = new User(4, "张三", "456",
+                "男", null, null);
+        userMapper.updateUser(user);
+    }
+
+    @Test
+    public void testInsertUser(){
+        User user = new User(null, "sadfqaf", "456",
+                "男", null, new Date());
+        userMapper.insertUser(user);
+        log.info("user is {}", user);
+    }
+
+    @Test
+    public void testDeleteUser(){
+
+        userMapper.deleteUser(4);
     }
 }
