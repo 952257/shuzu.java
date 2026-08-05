@@ -9,4 +9,18 @@
         <!--#{id} = 方法的入参-->
         SELECT * FROM t_users WHERE id = #{id}
     </select>
+
+    <!--直接使用参数名...-->
+    <select id="selectUserByIdAndPwd" resultType="User">
+        SELECT id,name,password,sex,birthday,registTime
+        FROM t_users
+        WHERE id = #{id}
+        AND password = #{pwd}
+    </select>
+
+    <select id="selectUsersByKeyword" resultType="User">
+        SELECT id,name,password,sex,birthday,registTime
+        FROM t_users
+        WHERE name LIKE concat('%', #{keyword}, '%')
+    </select>
 </mapper>
