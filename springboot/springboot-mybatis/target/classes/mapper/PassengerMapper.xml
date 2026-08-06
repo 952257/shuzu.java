@@ -15,4 +15,28 @@
     <select id="selectPassengerById" resultMap="passengerAndPassportMap">
         select * from t_passengers where id = #{id};
     </select>
+
+    <resultMap id="passengerAndPassportMap2" type="Passenger">
+        <id property="id" column="passenger_id"/>
+        <result property="name" column="passenger_name"/>
+        <result property="sex" column="sex"/>
+        <result property="birthday" column="birthday"/>
+        <association property="passport" javaType="Passport">
+            <id property="id" column="passport_id"/>
+            <result property="nationality" column="nationality"/>
+            <result property="expire" column="expire"/>
+        </association>
+    </resultMap>
+
+    <select id="selectPassengerById2" resultMap="passengerAndPassportMap2">
+        select pp.id as passport_id,
+               pp.nationality as nationality,
+               pp.expire as expire,
+               pe.id as passenger_id,
+               pe.name as passenger_name,
+               pe.sex as sex,
+               pe.birthday as birthday
+        from t_passports pp right join t_passengers pe on pp.passenger_id = pe.id
+        where pe.id = #{id};
+    </select>
 </mapper>

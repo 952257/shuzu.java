@@ -12,8 +12,8 @@ public interface UserMapper {
 
     User selectUserByIdAndPwd(@Param("id")Integer id , @Param("pwd")String pwd);
 
-    // 添加 Map 进行参数绑定；列名是 password，#{pwd} 对应 map 的 key
-    @Select("SELECT * FROM t_users WHERE id = #{id} AND password = #{pwd}")
+    @Select("SELECT * FROM t_users WHERE ID = #{id} AND PWD = #{pwd}")
+    //添加Map进行参数绑定
     User selectUserByIdAndPwd3(Map values);
 
     //使用对象属性进行参数绑定
