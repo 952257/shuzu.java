@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.springboot.mybatis.MyBatisTest" time="1.08" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.springboot.mybatis.MyBatisTest" time="0.963" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="socksProxyHost" value="127.0.0.1"/>
     <property name="http.proxyHost" value="127.0.0.1"/>
@@ -16,7 +16,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="CN"/>
     <property name="sun.boot.library.path" value="/Users/shenxuan/Library/Java/JavaVirtualMachines/graalvm-jdk-17.0.12/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/shenxuan/IdeaProjects/javafirst/springboot/springboot-mybatis/target/surefire/surefirebooter1452363618502374311.jar /Users/shenxuan/IdeaProjects/javafirst/springboot/springboot-mybatis/target/surefire 2026-08-05T13-41-05_133-jvmRun1 surefire1164050883505454043tmp surefire_010430493016090999751tmp"/>
+    <property name="sun.java.command" value="/Users/shenxuan/IdeaProjects/javafirst/springboot/springboot-mybatis/target/surefire/surefirebooter14741587960420361342.jar /Users/shenxuan/IdeaProjects/javafirst/springboot/springboot-mybatis/target/surefire 2026-08-06T10-43-30_979-jvmRun1 surefire5791209257284575370tmp surefire_012336890110991518484tmp"/>
     <property name="http.nonProxyHosts" value="127.0.0.1|192.168.0.0/16|*.192.168.0.0/16|10.0.0.0/8|*.10.0.0.0/8|172.16.0.0/12|*.172.16.0.0/12|localhost|*.localhost|local|*.local|crashlytics.com|*.crashlytics.com|&lt;local&gt;|*.&lt;local&gt;"/>
     <property name="jdk.debug" value="release"/>
     <property name="test" value="MyBatisTest#testSelectUserByIdAndPwd3"/>
@@ -36,7 +36,7 @@
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="apple.awt.application.name" value="ForkedBooter"/>
-    <property name="surefire.real.class.path" value="/Users/shenxuan/IdeaProjects/javafirst/springboot/springboot-mybatis/target/surefire/surefirebooter1452363618502374311.jar"/>
+    <property name="surefire.real.class.path" value="/Users/shenxuan/IdeaProjects/javafirst/springboot/springboot-mybatis/target/surefire/surefirebooter14741587960420361342.jar"/>
     <property name="user.script" value="Hans"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="127.0.0.1|192.168.0.0/16|*.192.168.0.0/16|10.0.0.0/8|*.10.0.0.0/8|172.16.0.0/12|*.172.16.0.0/12|localhost|*.localhost|local|*.local|crashlytics.com|*.crashlytics.com|&lt;local&gt;|*.&lt;local&gt;"/>
@@ -66,5 +66,5 @@
     <property name="java.class.version" value="61.0"/>
     <property name="http.proxyPort" value="7897"/>
   </properties>
-  <testcase name="testSelectUserByIdAndPwd3" classname="com.springboot.mybatis.MyBatisTest" time="0.161"/>
+  <testcase name="testSelectUserByIdAndPwd3" classname="com.springboot.mybatis.MyBatisTest" time="0.151"/>
 </testsuite>

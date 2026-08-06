@@ -56,7 +56,6 @@ public class MyBatisTest {
         log.info("users is {}", users);
     }
 
-
     @Test
     public void testUpdateUser(){
         User user = new User(4, "张三", "456",
