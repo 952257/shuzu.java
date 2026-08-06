@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springboot.mybatis.mapper.SubjectMapper">
+
+    <!-- 嵌套 Select：先查课程，再按 subject_id 查学生 -->
+    <resultMap id="SubjectAndStudentMap" type="Subject">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="grade" column="grade"/>
+        <collection property="students" ofType="Student"
+                    select="com.springboot.mybatis.mapper.StudentMapper.selectStudentBySubjectId"
+                    column="id"/>
+    </resultMap>
+
+    <select id="selectAllSubjects" resultMap="SubjectAndStudentMap">
+        select * from t_subject
+    </select>
+
+    <!-- 嵌套结果映射：一次 join 查出课程+学生 -->
+    <resultMap id="SubjectAndStudentMap2" type="Subject">
+        <id property="id" column="sub_id"/>
+        <result property="name" column="sub_name"/>
+        <result property="grade" column="sub_grade"/>
+        <collection property="students" ofType="Student">
+            <id property="id" column="stu_id"/>
+            <result property="name" column="stu_name"/>
+            <result property="sex" column="stu_sex"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectAllSubjects2" resultMap="SubjectAndStudentMap2">
+        select sub.id as sub_id,
+               sub.name as sub_name,
+               sub.grade as sub_grade,
+               stu.id as stu_id,
+               stu.name as stu_name,
+               stu.sex as stu_sex
+        from t_subject sub
+                 left join t_stu_sub ss on sub.id = ss.subject_id
+                 left join t_student stu on stu.id = ss.student_id
+    </select>
+</mapper>
