@@ -1,6 +1,7 @@
 package com.springboot.sakila.mapper;
 
 import com.springboot.sakila.po.Film;
+import com.springboot.sakila.vo.FilmVo;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -23,4 +24,8 @@ public interface FilmMapper {
 
     @Select("select * from film")
     List<Film> selectAll();
+
+    List<Film> queryByCondition(@Param("title") String title, @Param("year") Integer year);
+
+    List<FilmVo> queryFilmAndActorNamesByCondition(@Param("title") String title, @Param("year") Integer year);
 }

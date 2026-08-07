@@ -11,7 +11,7 @@
         <association property="passport" select="com.springboot.mybatis.mapper.PassportMapper.selectPassportByPassengerId"
                      column="id" javaType="Passport"/>
     </resultMap>
-    
+
     <select id="selectPassengerById" resultMap="passengerAndPassportMap">
         select * from t_passengers where id = #{id};
     </select>
@@ -30,13 +30,61 @@
 
     <select id="selectPassengerById2" resultMap="passengerAndPassportMap2">
         select pp.id as passport_id,
-               pp.nationality as nationality,
-               pp.expire as expire,
-               pe.id as passenger_id,
-               pe.name as passenger_name,
-               pe.sex as sex,
-               pe.birthday as birthday
+        pp.nationality as nationality,
+        pp.expire as expire,
+        pe.id as passenger_id,
+        pe.name as passenger_name,
+        pe.sex as sex,
+        pe.birthday as birthday
         from t_passports pp right join t_passengers pe on pp.passenger_id = pe.id
         where pe.id = #{id};
+    </select>
+
+    <select id="selectPassengerByCondition" resultType="passenger">
+        SELECT id,name,sex,birthday from t_passengers WHERE sex=#{sex}
+        <if test="name != null and name != ''">
+            AND name like '%${name}%'
+        </if>
+    </select>
+
+    <sql id="passengerSql">
+        p1.id, p1.name, p1.sex, p1.birthday,
+        p2.id as passport_id,p2.nationality, p2.expire,p2.passenger_id
+    </sql>
+
+    <select id="selectPassengerByCondition2" resultMap="passengerAndPassportMap2">
+        SELECT <include refid="passengerSql"/>
+        FROM t_passengers p1 LEFT JOIN t_passports p2
+        ON p1.id = p2.passenger_id
+        <where>
+            <if test="name != null and name != ''">
+                AND p1.name like '%${name}%'
+            </if>
+            <if test="passport != null and passport.nationality != null">
+                AND p2.nationality = #{passport.nationality}
+            </if>
+        </where>
+    </select>
+
+    <update id="updatePassengerIfNecessary">
+        update t_passengers
+        <set>
+            <if test="name != null">name=#{name},</if>
+            <if test="sex != null">sex=#{sex},</if>
+            <if test="birthday != null">birthday=#{birthday},</if>
+        </set>
+        where id= #{id}
+    </update>
+
+    <select id="selectPassengersIn" resultType="passenger">
+        SELECT id, name, sex, birthday
+        FROM t_passengers
+        <where>
+            --             id in ( 1001 , 1002 , 1003 )
+            <foreach item="item" index="index" collection="array"
+                     open="id in (" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
     </select>
 </mapper>

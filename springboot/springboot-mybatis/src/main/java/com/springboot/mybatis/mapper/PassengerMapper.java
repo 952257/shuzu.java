@@ -32,4 +32,7 @@ public interface PassengerMapper {
 	void updatePassengerIfNecessary(Passenger passenger);
 
 	List<Passenger> selectPassengersIn(Integer... ids);
+
+	@Select("select * from t_passengers")
+	List<Passenger> selectAllPassengersBase();
 }

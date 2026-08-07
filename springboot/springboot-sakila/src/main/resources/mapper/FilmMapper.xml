@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.springboot.sakila.mapper.FilmMapper">
+
+    <resultMap id="FilmMap" type="Film">
+        <id property="filmId" column="film_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="releaseYear" column="release_year"/>
+        <result property="languageId" column="language_id"/>
+        <result property="originalLanguageId" column="original_language_id"/>
+        <result property="rentalDuration" column="rental_duration"/>
+        <result property="rentalRate" column="rental_rate"/>
+        <result property="length" column="length"/>
+        <result property="replacementCost" column="replacement_cost"/>
+        <result property="rating" column="rating"/>
+        <result property="specialFeatures" column="special_features"/>
+        <result property="lastUpdate" column="last_update"/>
+        <association property="language" javaType="Language">
+            <id property="id" column="language_id"/>
+            <result property="name" column="language_name"/>
+        </association>
+    </resultMap>
+
+    <select id="queryByCondition" resultMap="FilmMap">
+        select f.*,l.name as language_name from film f
+        left join language l using(language_id)
+        <where>
+            <if test="title != null and title !=''">
+                AND f.title like concat('%', #{title}, '%')
+            </if>
+            <if test="year != null">
+                AND f.release_year = #{year}
+            </if>
+        </where>
+    </select>
+
+    <resultMap id="FilmAndActorNamesMap" type="com.springboot.sakila.vo.FilmVo">
+        <id property="filmId" column="film_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="releaseYear" column="release_year"/>
+        <result property="languageId" column="language_id"/>
+        <result property="originalLanguageId" column="original_language_id"/>
+        <result property="rentalDuration" column="rental_duration"/>
+        <result property="rentalRate" column="rental_rate"/>
+        <result property="length" column="length"/>
+        <result property="replacementCost" column="replacement_cost"/>
+        <result property="languageName" column="language_name"/>
+        <result property="actorNames" column="actor_names"/>
+    </resultMap>
+
+    <select id="queryFilmAndActorNamesByCondition" resultMap="FilmAndActorNamesMap">
+        select  f.*,l.name as language_name,
+        GROUP_CONCAT(DISTINCT CONCAT(a.first_name, ' ', a.last_name) SEPARATOR ', ') as actor_names
+        from film f
+        left join language l using(language_id)
+        left join film_actor fa using(film_id)
+        left join actor a using(actor_id)
+        <where>
+            <if test="title != null and title !=''">
+                AND f.title like concat('%', #{title}, '%')
+            </if>
+            <if test="year != null">
+                AND f.release_year = #{year}
+            </if>
+        </where>
+        group by f.film_id
+    </select>
+</mapper>

@@ -1,11 +1,11 @@
 package com.springboot.sakila.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.Year;
 
 /**
  * film表实体
@@ -14,6 +14,7 @@ import java.time.Year;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FilmVo {
 
     /**
@@ -34,7 +35,7 @@ public class FilmVo {
     /**
      * 发布年份 year
      */
-    private Year releaseYear;
+    private Integer releaseYear;
 
     /**
      * 语言id
@@ -65,5 +66,11 @@ public class FilmVo {
      * 替换成本 decimal(5,2)
      */
     private BigDecimal replacementCost;
+
+    //语言名称
+    private String languageName;
+
+    //多个演员姓名
+    private String actorNames;
 
 }

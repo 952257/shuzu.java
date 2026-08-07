@@ -1,5 +1,7 @@
 package com.springboot.mybatis;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.springboot.mybatis.entity.Passenger;
 import com.springboot.mybatis.entity.Passport;
 import com.springboot.mybatis.mapper.PassengerMapper;
@@ -53,5 +55,13 @@ public class TestDynamicSql {
     public void testSelectPassengersIn(){
         List<Passenger> passengers = passengerMapper.selectPassengersIn(1001, 1002, 1003);
         log.info("passengers is {}", passengers);
+    }
+
+    @Test
+    public void testSelectAllPassengersBase(){
+        Page<Passenger> pageInfo = PageHelper.startPage(1, 10);
+        List<Passenger> passengers = passengerMapper.selectAllPassengersBase();
+        log.info("pageInfo is {}", pageInfo);
+        List<Passenger> result = pageInfo.getResult();
     }
 }

@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.Year;
 import java.util.Date;
 
 /**
@@ -35,7 +34,7 @@ public class Film {
     /**
      * 发布年份 year
      */
-    private Year releaseYear;
+    private Integer releaseYear;
 
     /**
      * 语言id
@@ -81,5 +80,8 @@ public class Film {
      * 更新时间 timestamp
      */
     private Date lastUpdate;
+
+    private Language language;
+
 
 }
