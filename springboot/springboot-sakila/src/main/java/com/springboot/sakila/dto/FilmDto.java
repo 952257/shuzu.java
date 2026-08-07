@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.Year;
 
 /**
  * film表实体
@@ -29,7 +28,7 @@ public class FilmDto {
     /**
      * 发布年份 year
      */
-    private Year releaseYear;
+    private Integer releaseYear;
 
     /**
      * 语言id

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.springboot.sakila.mapper.FilmMapper">
+
+    <select id="queryByCondition" resultType="Film">
+        select * from film
+        <where>
+            <if test="title != null and title !=''">
+                AND title like concat('%', #{title}, '%')
+            </if>
+            <if test="year != null">
+                AND release_year = #{year}
+            </if>
+        </where>
+    </select>
+</mapper>

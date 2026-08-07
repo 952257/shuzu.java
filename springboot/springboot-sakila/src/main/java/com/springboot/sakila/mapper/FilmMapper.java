@@ -23,4 +23,6 @@ public interface FilmMapper {
 
     @Select("select * from film")
     List<Film> selectAll();
+
+    List<Film> queryByCondition(@Param("title") String title, @Param("year") Integer year);
 }

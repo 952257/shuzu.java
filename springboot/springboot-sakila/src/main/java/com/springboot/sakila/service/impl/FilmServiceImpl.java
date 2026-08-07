@@ -1,6 +1,10 @@
 package com.springboot.sakila.service.impl;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.springboot.sakila.dto.FilmDto;
 import com.springboot.sakila.mapper.FilmMapper;
 import com.springboot.sakila.po.Film;
@@ -25,10 +29,10 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public void modFilm(Long id, FilmDto filmDto) {
+    public void modFilm(Long id,FilmDto filmDto) {
         Film po = new Film();
-        BeanUtils.copyProperties(filmDto, po);
         po.setFilmId(id);
+        BeanUtils.copyProperties(filmDto, po);
         filmMapper.updateOne(po);
     }
 
@@ -62,4 +66,35 @@ public class FilmServiceImpl implements FilmService {
             return filmVo;
         }).toList();
     }
+
+    @Override
+    public PageInfo<FilmVo> queryForPage(String title, Integer year, int pageNum,
+                                         int pageSize,String orderBy,String order) {
+        String orderByColumn = orderBy + " " + order;
+        Page<Film> poPageInfo = PageHelper.startPage(pageNum, pageSize,
+                orderByColumn);
+        //专用的可被序列化的对象
+
+        List<Film> poList = filmMapper.queryByCondition(title, year);
+        PageInfo<Film> poPage = poPageInfo.toPageInfo();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+//            //序列化
+//            String poPageInfoJson = objectMapper.writeValueAsString(poPage);
+//            //反序列化
+//            PageInfo<FilmVo> voPageInfo = objectMapper.readValue(poPageInfoJson, PageInfo.class);
+            PageInfo<FilmVo> voPageInfo = new PageInfo<>();
+            List<FilmVo> filmVoList = poPage.getList().stream().map(po -> {
+            FilmVo vo = new FilmVo();
+            BeanUtils.copyProperties(po, vo);
+            return vo;
+            }).toList();
+            voPageInfo.setList(filmVoList);
+            return voPageInfo;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }
