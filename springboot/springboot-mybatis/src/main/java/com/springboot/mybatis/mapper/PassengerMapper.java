@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 public interface PassengerMapper {
-    //嵌套结果映射
+	//嵌套结果映射
 	Passenger selectPassengerById(Integer id);
 
 
@@ -23,4 +23,13 @@ public interface PassengerMapper {
 	@Select("select * from t_passengers where id = #{id}")
 	Passenger selectPassengerBaseById(Integer id);
 
+	//条件查询
+	List<Passenger> selectPassengerByCondition(Passenger passenger);
+
+	List<Passenger> selectPassengerByCondition2(Passenger passenger);
+
+
+	void updatePassengerIfNecessary(Passenger passenger);
+
+	List<Passenger> selectPassengersIn(Integer... ids);
 }
