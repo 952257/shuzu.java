@@ -22,6 +22,7 @@
         <module>springboot-web</module>
         <module>springboot-mybatis</module>
         <module>springboot-sakila</module>
+        <module>springboot-mybatisplus</module>
     </modules>
 
     <properties>

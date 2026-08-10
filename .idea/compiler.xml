@@ -10,6 +10,7 @@
         <module name="m2" />
         <module name="m1 (1)" />
         <module name="springboot-sakila" />
+        <module name="springboot-mybatisplus" />
         <module name="m3" />
         <module name="sakila" />
         <module name="m4" />
@@ -20,6 +21,7 @@
         <module name="springboot-web" />
         <module name="springboot-mybatis" />
         <module name="Atm" />
+        <module name="springboot-mybatisplus (1)" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -36,6 +38,8 @@
       <module name="springboot" options="" />
       <module name="springboot-demo" options="-parameters" />
       <module name="springboot-mybatis" options="-parameters" />
+      <module name="springboot-mybatisplus" options="-parameters" />
+      <module name="springboot-mybatisplus (1)" options="-parameters" />
       <module name="springboot-sakila" options="-parameters" />
       <module name="springboot-web" options="-parameters" />
     </option>
