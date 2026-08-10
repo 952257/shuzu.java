@@ -2,14 +2,22 @@ package com.springboot.mybatisplus;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.springboot.mybatisplus.entity.Employee;
+import com.springboot.mybatisplus.entity.OptimisticLock;
+import com.springboot.mybatisplus.entity.UserBatch;
 import com.springboot.mybatisplus.mapper.EmployeeMapper;
+import com.springboot.mybatisplus.mapper.OptimisticLockMapper;
+import com.springboot.mybatisplus.mapper.UserBatchMapper;
+import com.springboot.mybatisplus.service.EmployeeService;
+import com.springboot.mybatisplus.service.UserBatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +30,7 @@ public class MyBatisPlusApplicationTests {
     @Test
     public void testSelect(){
         List<Employee> employeeList = employeeMapper.selectList(null);
-		log.info(employeeList.toString());
+        log.info(employeeList.toString());
     }
 
     @Test
@@ -161,5 +169,75 @@ public class MyBatisPlusApplicationTests {
         log.info("总页数:{}",employeePage.getPages());
         List<Employee> employeeList = employeePage.getRecords();
         log.info("list is {}", employeeList);
+    }
+
+    @Resource
+    private EmployeeService employeeService;
+
+    @Test
+    public void testSave(){
+        Employee employee=new Employee();
+        employee.setName("孙宝来");
+        employee.setEmpGender("男");
+        employee.setAge(30);
+        employee.setEmail("sunbaolai@qq.com");
+        employeeService.save(employee);
+    }
+
+    @Test
+    public void testSaveOrUpdate(){
+        Employee employee=new Employee();
+        employee.setEmpId(2086650273104855041L);
+        employee.setName("孙宝来");
+        employee.setEmpGender("女");
+        employee.setAge(33);
+        employee.setEmail("sunbaolai@qq.com");
+        //如果已存在，就更新，否则执行添加
+        employeeService.saveOrUpdate(employee);
+    }
+
+    @Test
+    public void testGetOne(){
+        QueryWrapper<Employee> queryWrapper=new QueryWrapper<>();
+        queryWrapper.gt("age",24);
+        Employee employee = employeeService.getOne(queryWrapper,false);
+        log.info("employee:{}",employee);
+    }
+
+    @Resource
+    private UserBatchService batchService;
+
+    @Test
+    public void testInsertUserBatch(){
+        batchService.insertUserBatch();
+    }
+
+    @Resource
+    private UserBatchMapper userBatchMapper;
+
+    @Test
+    public void testStreamQuery(){
+        //current:起始页 size:每页多少条
+        Page<UserBatch> page = new Page<>(10,10);
+        log.info("current:{}",page.getCurrent());
+        userBatchMapper.selectList(page, Wrappers.emptyWrapper(), rc->{
+            UserBatch user = rc.getResultObject();
+            log.info(user.toString());
+            //当前第几条记录
+            int resultCount = rc.getResultCount();
+            log.info("resultCount is {}", resultCount);
+            log.info("---------------------------");
+        });
+    }
+
+    @Resource
+    private OptimisticLockMapper optimisticLockMapper;
+
+    @Test
+    public void test(){
+        OptimisticLock optimisticLock = optimisticLockMapper.selectById(1);
+        optimisticLock.setName("qqq");
+        optimisticLockMapper.updateById(optimisticLock);
+        log.info("version:{}",optimisticLock.getVersion());
     }
 }
