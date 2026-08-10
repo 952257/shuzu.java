@@ -1,0 +1,21 @@
+server:
+  port: 8080 # 内嵌的 Tomcat 端口号。默认值为 8080。
+
+
+environments:
+  dev:
+    url: http://test.bar.com
+    name: Developer Setup
+  prod:
+    url: http://foo.bar.com
+    name: My Cool App
+
+
+spring:
+  my-example:
+    url:
+      - http://example.com
+      - http://spring.io
+    auth:
+      username: aaa
+      password: bbb

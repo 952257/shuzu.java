@@ -15,4 +15,6 @@ public interface UserMyBatisMapper {
     @Insert("INSERT INTO USERMYBATIS(NAME, AGE) VALUES(#{name}, #{age})")
     int insert(@Param("name") String name, @Param("age") Integer age);
 
+    @Select("select * from usermybatis where id = #{id}")
+    UserMyBatis selectById(Long id);
 }

@@ -5,6 +5,9 @@ import com.springboot.mybatis.mapper.UserMyBatisMapper;
 import com.springboot.mybatis.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
@@ -16,6 +19,7 @@ import javax.annotation.Resource;
 
 @Service
 @Slf4j
+@CacheConfig(cacheNames="userMybatis")
 public class UserServiceImpl implements UserService {
 
     @Resource
@@ -51,5 +55,15 @@ public class UserServiceImpl implements UserService {
     public void addTwo2(UserMyBatis userMyBatis1, UserMyBatis userMyBatis2) {
         addOne(userMyBatis1);
         addOne(userMyBatis1);
+    }
+
+    @CachePut(key="#p0.id")
+    public int insert(UserMyBatis userMyBatis){
+        return userMyBatisMapper.insert(userMyBatis.getName(), userMyBatis.getAge());
+    }
+
+    @Cacheable
+    public UserMyBatis queryById(Long id){
+        return  userMyBatisMapper.selectById(id);
     }
 }

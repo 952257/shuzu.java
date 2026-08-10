@@ -10,7 +10,6 @@
         <module name="m2" />
         <module name="m1 (1)" />
         <module name="springboot-sakila" />
-        <module name="springboot-mybatisplus" />
         <module name="m3" />
         <module name="sakila" />
         <module name="m4" />
@@ -31,6 +30,7 @@
       <module name="m1" target="17" />
       <module name="m6 (1)" target="1.8" />
       <module name="springboot (1)" target="1.5" />
+      <module name="springboot-mybatisplus" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
