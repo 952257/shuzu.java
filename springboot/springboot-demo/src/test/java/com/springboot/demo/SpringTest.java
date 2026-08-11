@@ -1,8 +1,6 @@
 package com.springboot.demo;
 
-import com.springboot.demo.bean.Book;
-import com.springboot.demo.bean.BookConfig;
-import com.springboot.demo.bean.Enviroments;
+import com.springboot.demo.bean.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +18,7 @@ public class SpringTest {
     private BookConfig bookConfig;
 
     @Resource
-    private Enviroments enviroments;
+    private Environments enviroments;
 
     @Test
     public void testBook(){
@@ -35,5 +33,21 @@ public class SpringTest {
     @Test
     public void testEnviroments(){
         log.info("enviroments is {}",enviroments);
+    }
+
+    @Resource
+    private RandomConfig randomConfig;
+
+    @Test
+    public void testRandomConfig(){
+        log.info("randomConfig is {}",randomConfig);
+    }
+
+    @Resource
+    private SpringExample springExample;
+
+    @Test
+    public void testSpringMyExample(){
+        log.info("springMyExample is {}", springExample);
     }
 }

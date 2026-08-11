@@ -1,8 +1,5 @@
 package com.springboot.demo.ioc;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class C implements BIn{
 
 

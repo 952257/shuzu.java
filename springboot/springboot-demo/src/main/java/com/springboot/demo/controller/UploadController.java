@@ -38,8 +38,8 @@ public class UploadController {
     @RequestMapping("/download")
     public void download(String name, HttpServletResponse response) throws IOException {
         System.out.println("name:"+name);
-        // 用 File.separator，Mac/Windows 都可用；不要写死 \\
-        String real_path = path + File.separator + name;
+        //文件的完整路径
+        String real_path = path+"\\"+name;
 
         //设置响应头  告知浏览器，要以附件的形式保存内容   filename=浏览器显示的下载文件名
         response.setHeader("content-disposition","attachment;filename="+name);
