@@ -1,2 +1,7 @@
-server:
-  port: 8080 # 内嵌的 Tomcat 端口号。默认值为 8080。
+spring:
+  profiles:
+    active: prod
+
+file:
+  upload:
+    path: /Users/shenxuan/Downloads/壁纸
