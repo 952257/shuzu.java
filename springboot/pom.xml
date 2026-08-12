@@ -15,6 +15,7 @@
         <module>springboot-sakila</module>
         <module>springboot-mybatisplus</module>
         <module>springboot-others</module>
+        <module>helloworld-spring-boot-starter</module>
     </modules>
 
     <properties>

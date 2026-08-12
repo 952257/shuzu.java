@@ -7,6 +7,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="helloworld-spring-boot-starter (1)" />
+        <module name="helloworld-spring-boot-starter" />
         <module name="m2" />
         <module name="m1 (1)" />
         <module name="springboot-sakila" />
@@ -37,6 +39,8 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="helloworld-spring-boot-starter" options="" />
+      <module name="helloworld-spring-boot-starter (1)" options="-parameters" />
       <module name="springboot" options="" />
       <module name="springboot-demo" options="-parameters" />
       <module name="springboot-mybatis" options="-parameters" />

@@ -1,0 +1,27 @@
+{
+  "groups": [
+    {
+      "name": "spring.person",
+      "type": "com.helloworld.starter.PersonProperties",
+      "sourceType": "com.helloworld.starter.PersonProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "spring.person.age",
+      "type": "java.lang.Integer",
+      "sourceType": "com.helloworld.starter.PersonProperties"
+    },
+    {
+      "name": "spring.person.name",
+      "type": "java.lang.String",
+      "sourceType": "com.helloworld.starter.PersonProperties"
+    },
+    {
+      "name": "spring.person.sex",
+      "type": "java.lang.String",
+      "sourceType": "com.helloworld.starter.PersonProperties"
+    }
+  ],
+  "hints": []
+}
