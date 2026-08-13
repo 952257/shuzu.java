@@ -8,7 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="helloworld-spring-boot-starter (1)" />
-        <module name="helloworld-spring-boot-starter" />
+        <module name="springboot-TT" />
         <module name="m2" />
         <module name="m1 (1)" />
         <module name="springboot-sakila" />
@@ -19,6 +19,7 @@
         <module name="m6" />
         <module name="demo" />
         <module name="springboot-demo" />
+        <module name="springboot-sakila-mybatisplus" />
         <module name="springboot-web" />
         <module name="springboot-others (1)" />
         <module name="springboot-mybatis" />
@@ -28,6 +29,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="atm" target="25" />
+      <module name="helloworld-spring-boot-starter" target="1.8" />
       <module name="m" target="25" />
       <module name="m-all (1)" target="1.8" />
       <module name="m1" target="17" />
@@ -35,6 +37,7 @@
       <module name="springboot (1)" target="1.5" />
       <module name="springboot-mybatisplus" target="17" />
       <module name="springboot-others" target="17" />
+      <module name="springboot-sakila-mybatisplus (1)" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -42,6 +45,7 @@
       <module name="helloworld-spring-boot-starter" options="" />
       <module name="helloworld-spring-boot-starter (1)" options="-parameters" />
       <module name="springboot" options="" />
+      <module name="springboot-TT" options="-parameters" />
       <module name="springboot-demo" options="-parameters" />
       <module name="springboot-mybatis" options="-parameters" />
       <module name="springboot-mybatisplus" options="-parameters" />
@@ -49,6 +53,7 @@
       <module name="springboot-others" options="-parameters" />
       <module name="springboot-others (1)" options="-parameters" />
       <module name="springboot-sakila" options="-parameters" />
+      <module name="springboot-sakila-mybatisplus" options="-parameters" />
       <module name="springboot-web" options="-parameters" />
     </option>
   </component>

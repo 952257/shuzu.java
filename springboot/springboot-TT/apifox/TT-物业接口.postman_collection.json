@@ -1,0 +1,4290 @@
+{
+  "info": {
+    "_postman_id": "63469870-f4d2-4e77-8654-3778fcc5105c",
+    "name": "TT物业-分工接口测试",
+    "description": "仅覆盖分工表中的接口（不含商城/物联网/公告问卷等）。\n\n导入：Apifox → Postman。环境选「TT物业-本地8088」。\n地址变量 ttBaseUrl = http://localhost:8088，不要用 8080。\n先跑「00-登录」，或依赖集合前置自动登录（admin/admin）。\n带序号的闭环用例必须按顺序跑，后置脚本会把新建 ID 写入环境变量。\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{ttToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "var name = (pm.info && pm.info.requestName) ? pm.info.requestName : \"\";",
+          "if (name.indexOf(\"登录\") === 0) { return; }",
+          "var token = pm.environment.get(\"ttToken\") || pm.collectionVariables.get(\"ttToken\");",
+          "if (token) { return; }",
+          "var base = pm.environment.get(\"ttBaseUrl\") || pm.collectionVariables.get(\"ttBaseUrl\") || \"http://localhost:8088\";",
+          "pm.sendRequest({",
+          "  url: base + \"/app/login.pcUserLogin\",",
+          "  method: \"POST\",",
+          "  header: { \"Content-Type\": \"application/json\" },",
+          "  body: { mode: \"raw\", raw: JSON.stringify({ username: \"admin\", passwd: \"admin\" }) }",
+          "}, function (err, res) {",
+          "  if (!res) { return; }",
+          "  var json = res.json();",
+          "  if (json && json.data && json.data.token) {",
+          "    pm.environment.set(\"ttToken\", json.data.token);",
+          "    pm.collectionVariables.set(\"ttToken\", json.data.token);",
+          "  }",
+          "});",
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "ttBaseUrl",
+      "value": "http://localhost:8088"
+    },
+    {
+      "key": "ttToken",
+      "value": ""
+    },
+    {
+      "key": "communityId",
+      "value": "2022081539020475"
+    }
+  ],
+  "item": [
+    {
+      "name": "00-登录",
+      "description": "登录是后续接口的前置，不算分工模块。",
+      "item": [
+        {
+          "name": "登录-账号密码成功",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/login.pcUserLogin",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "login.pcUserLogin"
+              ],
+              "query": []
+            },
+            "description": "成功后写入 ttToken。",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"passwd\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"登录成功\", function () {",
+                  "  pm.expect(json.code).to.eql(0);",
+                  "  pm.expect(json.data.token).to.be.a(\"string\").and.to.have.lengthOf.at.least(20);",
+                  "  pm.expect(json.data.userId).to.be.a(\"string\");",
+                  "  pm.expect(json.data.role).to.be.oneOf([\"ADMIN\", \"STAFF\"]);",
+                  "});",
+                  "if (json && json.data && json.data.token) {",
+                  "  pm.environment.set(\"ttToken\", json.data.token);",
+                  "  pm.collectionVariables.set(\"ttToken\", json.data.token);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "登录-密码错误",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/login.pcUserLogin",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "login.pcUserLogin"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"passwd\": \"wrong\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 401\", function () { pm.expect(json.code).to.eql(401); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"用户或密码错误\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01-小区物业楼栋（沈炫）",
+      "description": "小区、物业、楼栋增删改查。闭环用新建数据，不改演示小区。",
+      "item": [
+        {
+          "name": "物业-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/property.listProperty?page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "property.listProperty"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "物业-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/property.saveProperty",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "property.saveProperty"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"用例物业\",\n  \"tel\": \"13800000000\",\n  \"address\": \"测试地址\",\n  \"corporation\": \"张三\",\n  \"foundingTime\": \"2020-01-01\",\n  \"state\": \"48001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseStoreId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseStoreId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "物业-2修改",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/property.updateProperty",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "property.updateProperty"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": \"{{caseStoreId}}\",\n  \"name\": \"用例物业-改\",\n  \"tel\": \"13800000001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "物业-3删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/property.deleteProperty",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "property.deleteProperty"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeId\": \"{{caseStoreId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "物业-名称为空",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/property.saveProperty",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "property.saveProperty"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tel\": \"13800000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"物业公司名称不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "小区-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/community.listCommunitys?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "community.listCommunitys"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "小区-按名称",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/community.listCommunitys?name=测试&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "community.listCommunitys"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "测试",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "小区-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/community.saveCommunity",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "community.saveCommunity"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"用例小区\",\n  \"address\": \"西宁市\",\n  \"cityCode\": \"630104\",\n  \"cityName\": \"城西区\",\n  \"tel\": \"18900001111\",\n  \"storeId\": \"10001\",\n  \"nearbyLandmarks\": \"中心广场\",\n  \"state\": \"1100\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseCommunityId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseCommunityId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "小区-2修改",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/community.updateCommunity",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "community.updateCommunity"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"{{caseCommunityId}}\",\n  \"name\": \"用例小区-改\",\n  \"address\": \"西宁市城西区\",\n  \"nearbyLandmarks\": \"中心广场\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "小区-3删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/community.deleteCommunity",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "community.deleteCommunity"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"{{caseCommunityId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "小区-名称为空",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/community.saveCommunity",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "community.saveCommunity"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"西宁市\",\n  \"cityCode\": \"630104\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"小区名称不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "楼栋-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/floor.queryFloors?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "floor.queryFloors"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "楼栋-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/floor.saveFloor",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "floor.saveFloor"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"floorNum\": \"T{{$timestamp}}\",\n  \"name\": \"用例楼栋\",\n  \"floorArea\": 1000,\n  \"seq\": 99\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseFloorId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseFloorId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "楼栋-2修改",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/floor.editFloor",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "floor.editFloor"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"floorId\": \"{{caseFloorId}}\",\n  \"name\": \"用例楼栋-改\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "楼栋-3删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/floor.deleteFloor",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "floor.deleteFloor"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"floorId\": \"{{caseFloorId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "楼栋-名称为空",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/floor.saveFloor",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "floor.saveFloor"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"floorNum\": \"99\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"楼栋名称不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02-单元与工单（陈金龙）",
+      "description": "单元 CRUD + 工单（报修、投诉）。",
+      "item": [
+        {
+          "name": "单元-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/unit.queryUnits?floorId=3022081500000001&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "unit.queryUnits"
+              ],
+              "query": [
+                {
+                  "key": "floorId",
+                  "value": "3022081500000001",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "单元-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/unit.saveUnit",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "unit.saveUnit"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"floorId\": \"3022081500000001\",\n  \"unitNum\": \"T{{$timestamp}}\",\n  \"layerCount\": 6,\n  \"lift\": \"1010\",\n  \"unitArea\": 800\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseUnitId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseUnitId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "单元-2修改",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/unit.updateUnit",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "unit.updateUnit"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": \"{{caseUnitId}}\",\n  \"unitNum\": \"9\",\n  \"layerCount\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "单元-3删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/unit.deleteUnit",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "unit.deleteUnit"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": \"{{caseUnitId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "单元-缺楼栋",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/unit.saveUnit",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "unit.saveUnit"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitNum\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"楼栋ID不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "报修-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/repair.listRepairs?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "repair.listRepairs"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "报修-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/repair.saveRepair",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "repair.saveRepair"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"repairName\": \"用例报修\",\n  \"tel\": \"13800001111\",\n  \"repairObjName\": \"1-1-101\",\n  \"context\": \"水管漏水\",\n  \"repairType\": \"1001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseRepairId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseRepairId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "报修-2派单",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/repair.dispatchRepair",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "repair.dispatchRepair"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repairId\": \"{{caseRepairId}}\",\n  \"staffId\": \"1000000002\",\n  \"staffName\": \"吴学文\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "报修-3完成",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/repair.finishRepair",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "repair.finishRepair"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repairId\": \"{{caseRepairId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "报修-4删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/repair.deleteRepair",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "repair.deleteRepair"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repairId\": \"{{caseRepairId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "报修-缺报修人",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/repair.saveRepair",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "repair.saveRepair"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"context\": \"漏水\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"报修人不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "投诉-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/complaint.listComplaints?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "complaint.listComplaints"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "投诉-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/complaint.saveComplaint",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "complaint.saveComplaint"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"typeCd\": \"809001\",\n  \"complaintName\": \"用例投诉\",\n  \"tel\": \"13800001111\",\n  \"context\": \"楼道堆物\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseComplaintId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseComplaintId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "投诉-2办理",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/complaint.auditComplaint",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "complaint.auditComplaint"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"complaintId\": \"{{caseComplaintId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "投诉-3删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/complaint.deleteComplaint",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "complaint.deleteComplaint"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"complaintId\": \"{{caseComplaintId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "投诉-缺内容",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/complaint.saveComplaint",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "complaint.saveComplaint"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"complaintName\": \"用例\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"投诉内容不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03-房屋交房退房车位（包磊）",
+      "description": "房屋、交房、退房、车位。不改 1-1-101 种子房。",
+      "item": [
+        {
+          "name": "房屋-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.queryRooms?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.queryRooms"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "房屋-未售",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.queryRoomsWithOutSell?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.queryRoomsWithOutSell"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "房屋-已入住",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.queryRoomsWithSell?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.queryRoomsWithSell"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "房屋-按业主",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.queryRoomsByOwner?ownerId=6022081500000001&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.queryRoomsByOwner"
+              ],
+              "query": [
+                {
+                  "key": "ownerId",
+                  "value": "6022081500000001",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "房屋-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.saveRoom",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.saveRoom"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"unitId\": \"4022081500000001\",\n  \"roomNum\": \"T{{$timestamp}}\",\n  \"layer\": \"9\",\n  \"apartment\": \"两室一厅\",\n  \"builtUpArea\": 90,\n  \"roomArea\": 80,\n  \"state\": \"2001\",\n  \"roomSubType\": \"110\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseRoomId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseRoomId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "房屋-2修改",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.updateRoom",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.updateRoom"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": \"{{caseRoomId}}\",\n  \"apartment\": \"三室两厅\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "房屋-3交房",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.sellRoom",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.sellRoom"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": \"{{caseRoomId}}\",\n  \"ownerId\": \"6022081500000001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "房屋-4退房",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.exitRoom",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.exitRoom"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": \"{{caseRoomId}}\",\n  \"ownerId\": \"6022081500000001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "房屋-5删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.deleteRoom",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.deleteRoom"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": \"{{caseRoomId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "房屋-缺房号",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.saveRoom",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.saveRoom"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"unitId\": \"4022081500000001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"房屋编号不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "交房-缺业主",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/room.sellRoom",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "room.sellRoom"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": \"5022081500000001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"业主ID不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "车位-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/parkingSpace.queryParkingSpaces?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "parkingSpace.queryParkingSpaces"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "车位-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/parkingSpace.saveParkingSpace",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "parkingSpace.saveParkingSpace"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"num\": \"T-{{$timestamp}}\",\n  \"parkingType\": \"1\",\n  \"state\": \"F\",\n  \"area\": 12\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"casePsId\", json.data);",
+                  "  pm.collectionVariables.set(\"casePsId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "车位-2修改",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/parkingSpace.editParkingSpace",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "parkingSpace.editParkingSpace"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"psId\": \"{{casePsId}}\",\n  \"area\": 15\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "车位-3出售",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/parkingSpace.sellParkingSpace",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "parkingSpace.sellParkingSpace"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"psId\": \"{{casePsId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "车位-4退租",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/parkingSpace.exitParkingSpace",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "parkingSpace.exitParkingSpace"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"psId\": \"{{casePsId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "车位-5删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/parkingSpace.deleteParkingSpace",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "parkingSpace.deleteParkingSpace"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"psId\": \"{{casePsId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "车位-缺编号",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/parkingSpace.saveParkingSpace",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "parkingSpace.saveParkingSpace"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"车位编号不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04-业主家庭账户（王新宇）",
+      "description": "业主、家庭成员、账户预存/撤销。预存后必须撤销。",
+      "item": [
+        {
+          "name": "业主-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/owner.queryOwners?communityId=2022081539020475&ownerTypeCd=1001&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "owner.queryOwners"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "ownerTypeCd",
+                  "value": "1001",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "业主-按姓名",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/owner.queryOwners?communityId=2022081539020475&name=李明&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "owner.queryOwners"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "name",
+                  "value": "李明",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "业主-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/owner.saveOwner",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "owner.saveOwner"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"name\": \"用例业主\",\n  \"link\": \"13700001111\",\n  \"idCard\": \"630104199001010011\",\n  \"sex\": \"0\",\n  \"ownerTypeCd\": \"1001\",\n  \"personRole\": \"1\",\n  \"state\": \"2000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseOwnerId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseOwnerId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "业主-2修改",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/owner.editOwner",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "owner.editOwner"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": \"{{caseOwnerId}}\",\n  \"ownerId\": \"{{caseOwnerId}}\",\n  \"name\": \"用例业主-改\",\n  \"link\": \"13700001112\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "家庭-1新增成员",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/owner.saveOwner",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "owner.saveOwner"
+              ],
+              "query": []
+            },
+            "description": "ownerTypeCd=1002 表示家庭成员，ownerId 指向业主。",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"ownerId\": \"{{caseOwnerId}}\",\n  \"name\": \"用例家属\",\n  \"link\": \"13700002222\",\n  \"ownerTypeCd\": \"1002\",\n  \"personRole\": \"2\",\n  \"state\": \"2000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseMemberId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseMemberId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "家庭-2成员列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/owner.queryOwnerMembers?ownerId={{caseOwnerId}}&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "owner.queryOwnerMembers"
+              ],
+              "query": [
+                {
+                  "key": "ownerId",
+                  "value": "{{caseOwnerId}}",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "家庭-3删除成员",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/owner.deleteOwner",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "owner.deleteOwner"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": \"{{caseMemberId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "业主-3删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/owner.deleteOwner",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "owner.deleteOwner"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": \"{{caseOwnerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "业主-缺手机号",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/owner.saveOwner",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "owner.saveOwner"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"name\": \"无名\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"手机号不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账户-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/account.queryOwnerAccount?communityId=2022081539020475&objId=6022081500000001&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "account.queryOwnerAccount"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "objId",
+                  "value": "6022081500000001",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账户-明细",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/account.listAccountDetail?acctId=C022081500000001&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "account.listAccountDetail"
+              ],
+              "query": [
+                {
+                  "key": "acctId",
+                  "value": "C022081500000001",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账户-1预存",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/account.ownerPrestoreAccount",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "account.ownerPrestoreAccount"
+              ],
+              "query": []
+            },
+            "description": "预存 1 元后务必跑下一条撤销，把余额改回去。",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"acctId\": \"C022081500000001\",\n  \"amount\": \"1\",\n  \"remark\": \"用例预存\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseAcctDetailId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseAcctDetailId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账户-2撤销明细",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/account.cancelAccountDetail",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "account.cancelAccountDetail"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"detailId\": \"{{caseAcctDetailId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账户-预存金额非法",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/account.ownerPrestoreAccount",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "account.ownerPrestoreAccount"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"acctId\": \"C022081500000001\",\n  \"amount\": \"0\",\n  \"remark\": \"非法\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"预存金额必须大于0\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05-费用（冯伟）",
+      "description": "费用项、创建费、查询、缴费、结束费用、缴费记录、水电抄表。",
+      "item": [
+        {
+          "name": "费用项-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/feeConfig.listFeeConfigs?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "feeConfig.listFeeConfigs"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "费用项-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/feeConfig.saveFeeConfig",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "feeConfig.saveFeeConfig"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"feeName\": \"用例卫生费\",\n  \"feeTypeCd\": \"888800010004\",\n  \"feeFlag\": \"1003006\",\n  \"squarePrice\": 0.5,\n  \"additionalAmount\": 0,\n  \"paymentCycle\": \"12\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseConfigId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseConfigId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "费用项-2修改",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/feeConfig.updateFeeConfig",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "feeConfig.updateFeeConfig"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"configId\": \"{{caseConfigId}}\",\n  \"feeName\": \"用例卫生费-改\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账单-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/fee.listFee?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "fee.listFee"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账单-收费中",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/fee.listFee?communityId=2022081539020475&state=2008001&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "fee.listFee"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "state",
+                  "value": "2008001",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账单-queryFee",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/fee.queryFee?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "fee.queryFee"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账单-1创建",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/fee.saveFee",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "fee.saveFee"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"configId\": \"{{caseConfigId}}\",\n  \"payerObjId\": \"5022081500000001\",\n  \"payerObjType\": \"3333\",\n  \"amount\": 10.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseFeeId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseFeeId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账单-2缴费",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/fee.payFee",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "fee.payFee"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feeId\": \"{{caseFeeId}}\",\n  \"receivedAmount\": 10.5,\n  \"cycles\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseFeeDetailId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseFeeDetailId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "缴费记录-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/fee.queryFeeDetail?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "fee.queryFeeDetail"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "账单-3结束费用",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/fee.deleteFee",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "fee.deleteFee"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feeId\": \"{{caseFeeId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "费用项-3删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/feeConfig.deleteFeeConfig",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "feeConfig.deleteFeeConfig"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"configId\": \"{{caseConfigId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "创建账单-缺费用项",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/fee.saveFee",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "fee.saveFee"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"payerObjId\": \"5022081500000001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务失败 code!=0\", function () { pm.expect(json.code).to.not.eql(0); });",
+                  "pm.test(\"错误码 1001\", function () { pm.expect(json.code).to.eql(1001); });",
+                  "pm.test(\"错误文案\", function () { pm.expect(json.msg).to.eql(\"费用项ID不能为空\"); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "抄表-列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/meterWater.listMeterWaters?communityId=2022081539020475&page=1&row=10",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "meterWater.listMeterWaters"
+              ],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "2022081539020475",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "row",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "  pm.expect(json.data).to.be.an(\"array\");",
+                  "  pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "抄表-1新增",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/meterWater.saveMeterWater",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "meterWater.saveMeterWater"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communityId\": \"2022081539020475\",\n  \"objId\": \"5022081500000001\",\n  \"objType\": \"3333\",\n  \"meterType\": \"2020\",\n  \"preDegrees\": 100,\n  \"curDegrees\": 125\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  "",
+                  "pm.test(\"返回新建ID\", function () {",
+                  "  pm.expect(json.data).to.be.a(\"string\").and.to.have.lengthOf.at.least(4);",
+                  "});",
+                  "if (json && json.code === 0 && json.data) {",
+                  "  pm.environment.set(\"caseWaterId\", json.data);",
+                  "  pm.collectionVariables.set(\"caseWaterId\", json.data);",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "抄表-2修改",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/meterWater.updateMeterWater",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "meterWater.updateMeterWater"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"waterId\": \"{{caseWaterId}}\",\n  \"curDegrees\": 130\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "抄表-3删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ttBaseUrl}}/app/meterWater.deleteMeterWater",
+              "host": [
+                "{{ttBaseUrl}}"
+              ],
+              "path": [
+                "app",
+                "meterWater.deleteMeterWater"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"waterId\": \"{{caseWaterId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"业务成功 code=0\", function () { pm.expect(json.code).to.eql(0); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

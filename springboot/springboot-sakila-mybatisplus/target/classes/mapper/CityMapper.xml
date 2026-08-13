@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace = 所需实现的接口全限定名-->
+<mapper namespace="com.sakila.mybatisplus.mapper.CityMapper">
+    <select id="selectCityAndCountryByPage" resultType="com.sakila.mybatisplus.vo.CityVo">
+        SELECT c.city_id, c.city, c.country_id, c.last_update, co.country
+            FROM city c
+            left JOIN country co ON c.country_id = co.country_id
+        <where>
+            <if test="city != null and city != ''">
+                AND c.city LIKE CONCAT('%', #{city}, '%')
+            </if>
+            <if test="country != null and country != ''">
+                AND co.country LIKE CONCAT('%', #{country}, '%')
+            </if>
+        </where>
+    </select>
+</mapper>

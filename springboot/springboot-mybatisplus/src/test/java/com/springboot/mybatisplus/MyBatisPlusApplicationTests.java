@@ -30,7 +30,7 @@ public class MyBatisPlusApplicationTests {
     @Test
     public void testSelect(){
         List<Employee> employeeList = employeeMapper.selectList(null);
-        log.info(employeeList.toString());
+		log.info(employeeList.toString());
     }
 
     @Test
