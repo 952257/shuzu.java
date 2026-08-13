@@ -30,13 +30,13 @@ public class PropertyController {
         return Result.ok(propertyService.saveProperty(store));
     }
 
-    @PostMapping("/property.updateProperty")
+    @PutMapping("/property.updateProperty")
     public Result<Void> update(@RequestBody Store store) {
         propertyService.updateProperty(store);
         return Result.ok();
     }
 
-    @PostMapping("/property.deleteProperty")
+    @DeleteMapping("/property.deleteProperty")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         propertyService.deleteProperty(body.get("storeId"));
         return Result.ok();

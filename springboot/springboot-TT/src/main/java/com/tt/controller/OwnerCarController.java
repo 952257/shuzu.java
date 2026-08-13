@@ -30,13 +30,13 @@ public class OwnerCarController {
         return Result.ok(ownerCarService.saveOwnerCar(car));
     }
 
-    @PostMapping("/owner.updateOwnerCar")
+    @PutMapping("/owner.updateOwnerCar")
     public Result<Void> update(@RequestBody OwnerCar car) {
         ownerCarService.updateOwnerCar(car);
         return Result.ok();
     }
 
-    @PostMapping("/owner.deleteOwnerCar")
+    @DeleteMapping("/owner.deleteOwnerCar")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         ownerCarService.deleteOwnerCar(body.get("carId"));
         return Result.ok();

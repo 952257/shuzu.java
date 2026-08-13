@@ -5,15 +5,17 @@
       <span class="blob blob-b"></span>
       <span class="blob blob-c"></span>
       <span class="blob blob-d"></span>
+      <span class="blob blob-e"></span>
       <span class="caustic"></span>
-      <span class="grain"></span>
     </div>
     <div class="env-light" aria-hidden="true"></div>
     <svg class="lg-svg" aria-hidden="true">
-      <filter id="lg-refract" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="2" seed="7" result="noise" />
-        <feGaussianBlur in="noise" stdDeviation="1.2" result="soft" />
-        <feDisplacementMap in="SourceGraphic" in2="soft" scale="22" xChannelSelector="R" yChannelSelector="G" />
+      <filter id="lg-edge" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feMorphology in="SourceAlpha" operator="erode" radius="7" result="inner" />
+        <feComposite in="SourceAlpha" in2="inner" operator="out" result="rim" />
+        <feGaussianBlur in="rim" stdDeviation="3.2" result="softRim" />
+        <feColorMatrix in="softRim" type="matrix" values="0 0 0 0.5 0.5  0 0 0 0.28 0.5  0 0 0 0 0.5  0 0 0 0 1" result="map" />
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="18" xChannelSelector="R" yChannelSelector="G" />
       </filter>
     </svg>
     <router-view />

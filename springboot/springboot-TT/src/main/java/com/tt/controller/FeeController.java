@@ -31,13 +31,13 @@ public class FeeController {
         return Result.ok(feeService.saveFeeConfig(config));
     }
 
-    @PostMapping("/feeConfig.updateFeeConfig")
+    @PutMapping("/feeConfig.updateFeeConfig")
     public Result<Void> updateConfig(@RequestBody FeeConfig config) {
         feeService.updateFeeConfig(config);
         return Result.ok();
     }
 
-    @PostMapping("/feeConfig.deleteFeeConfig")
+    @DeleteMapping("/feeConfig.deleteFeeConfig")
     public Result<Void> deleteConfig(@RequestBody Map<String, String> body) {
         feeService.deleteFeeConfig(body.get("configId"));
         return Result.ok();
@@ -75,7 +75,7 @@ public class FeeController {
         return Result.ok(feeService.payFeesByPayer(body.get("payerObjId")));
     }
 
-    @PostMapping("/fee.deleteFee")
+    @DeleteMapping("/fee.deleteFee")
     public Result<Void> deleteFee(@RequestBody Map<String, String> body) {
         feeService.deleteFee(body.get("feeId"));
         return Result.ok();

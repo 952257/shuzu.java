@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "63469870-f4d2-4e77-8654-3778fcc5105c",
+    "_postman_id": "ebc90a39-c91c-45fb-877f-aa49a707047a",
     "name": "TT物业-分工接口测试",
     "description": "仅覆盖分工表中的接口（不含商城/物联网/公告问卷等）。\n\n导入：Apifox → Postman。环境选「TT物业-本地8088」。\n地址变量 ttBaseUrl = http://localhost:8088，不要用 8080。\n先跑「00-登录」，或依赖集合前置自动登录（admin/admin）。\n带序号的闭环用例必须按顺序跑，后置脚本会把新建 ID 写入环境变量。\n",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -287,7 +287,7 @@
         {
           "name": "物业-2修改",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -334,7 +334,7 @@
         {
           "name": "物业-3删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -593,7 +593,7 @@
         {
           "name": "小区-2修改",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -640,7 +640,7 @@
         {
           "name": "小区-3删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -845,7 +845,7 @@
         {
           "name": "楼栋-2修改",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -892,7 +892,7 @@
         {
           "name": "楼栋-3删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -1103,7 +1103,7 @@
         {
           "name": "单元-2修改",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -1150,7 +1150,7 @@
         {
           "name": "单元-3删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -1449,7 +1449,7 @@
         {
           "name": "报修-4删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -1701,7 +1701,7 @@
         {
           "name": "投诉-3删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -2074,7 +2074,7 @@
         {
           "name": "房屋-2修改",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -2215,7 +2215,7 @@
         {
           "name": "房屋-5删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -2469,7 +2469,7 @@
         {
           "name": "车位-2修改",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -2610,7 +2610,7 @@
         {
           "name": "车位-5删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -2885,7 +2885,7 @@
         {
           "name": "业主-2修改",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -3041,7 +3041,7 @@
         {
           "name": "家庭-3删除成员",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -3088,7 +3088,7 @@
         {
           "name": "业主-3删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -3563,7 +3563,7 @@
         {
           "name": "费用项-2修改",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -3941,7 +3941,7 @@
         {
           "name": "账单-3结束费用",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -3988,7 +3988,7 @@
         {
           "name": "费用项-3删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",
@@ -4193,7 +4193,7 @@
         {
           "name": "抄表-2修改",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -4240,7 +4240,7 @@
         {
           "name": "抄表-3删除",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Content-Type",

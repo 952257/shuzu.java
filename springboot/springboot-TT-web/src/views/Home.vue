@@ -26,82 +26,117 @@
       </div>
     </div>
 
-    <el-row :gutter="16">
-      <el-col :span="16">
-        <div class="panel">
-          <div class="panel-head">
-            <h3>待办工单</h3>
-            <el-button link type="primary" @click="$router.push('/repair')">全部报修</el-button>
-          </div>
-          <el-table :data="repairs" size="small" stripe empty-text="暂无报修">
-            <el-table-column prop="repairName" label="报修人" width="90" />
-            <el-table-column prop="repairObjName" label="位置" width="110" />
-            <el-table-column prop="context" label="内容" show-overflow-tooltip />
-            <el-table-column label="状态" width="100">
-              <template #default="{ row }">
-                <el-tag :type="repairTag(row.state).type" size="small">{{ repairTag(row.state).label }}</el-tag>
-              </template>
-            </el-table-column>
-          </el-table>
-          <div class="panel-head" style="margin-top: 18px">
-            <h3>最新投诉</h3>
-            <el-button link type="primary" @click="$router.push('/complaint')">全部投诉</el-button>
-          </div>
-          <el-table :data="complaints" size="small" stripe empty-text="暂无投诉">
-            <el-table-column prop="complaintName" label="投诉人" width="90" />
-            <el-table-column label="类型" width="90">
-              <template #default="{ row }">
-                <el-tag :type="row.typeCd === '809002' ? 'success' : 'danger'" size="small">
-                  {{ row.typeCd === "809002" ? "建议" : "投诉" }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="context" label="内容" show-overflow-tooltip />
-            <el-table-column label="状态" width="100">
-              <template #default="{ row }">
-                <el-tag :type="complaintTag(row.state).type" size="small">{{ complaintTag(row.state).label }}</el-tag>
-              </template>
-            </el-table-column>
-          </el-table>
-          <div class="panel-head" style="margin-top: 18px">
-            <h3>最新公告</h3>
-            <el-button link type="primary" @click="$router.push('/notice')">全部公告</el-button>
-          </div>
-          <el-table :data="notices" size="small" stripe empty-text="暂无公告">
-            <el-table-column prop="title" label="标题" width="160" />
-            <el-table-column prop="context" label="内容" show-overflow-tooltip />
-          </el-table>
-        </div>
-      </el-col>
-      <el-col :span="8">
-        <div class="panel">
-          <h3>小区档案</h3>
-          <el-descriptions :column="1" border size="small" v-if="community">
-            <el-descriptions-item label="名称">{{ community.name }}</el-descriptions-item>
-            <el-descriptions-item label="地址">{{ community.address }}</el-descriptions-item>
-            <el-descriptions-item label="电话">{{ community.tel }}</el-descriptions-item>
-            <el-descriptions-item label="地标">{{ community.nearbyLandmarks }}</el-descriptions-item>
-            <el-descriptions-item label="收费周期">{{ community.payFeeMonth }} 个月</el-descriptions-item>
-          </el-descriptions>
-          <h3 style="margin-top: 18px">房屋入住</h3>
-          <el-progress :percentage="soldRate" :stroke-width="12" striped striped-flow />
-          <p class="muted">已入住 {{ sold }} / 共 {{ rooms.length }} 套</p>
-          <h3 style="margin-top: 18px">收费状态</h3>
-          <el-progress :percentage="feeOpenRate" status="warning" :stroke-width="12" />
-          <p class="muted">收费中 {{ feeOpen }} 笔 · 已结束 {{ feeClosed }} 笔</p>
-        </div>
-        <div class="panel" style="margin-top: 16px">
+    <div class="home-board">
+      <section class="panel sop-panel">
+        <div class="panel-head">
           <h3>标准作业顺序</h3>
-          <el-steps direction="vertical" :active="3" finish-status="success">
-            <el-step title="建物业与小区" description="维护公司和小区基础信息" />
-            <el-step title="录楼栋房屋" description="楼栋 → 单元 → 房屋 / 车位" />
-            <el-step title="绑定业主" description="添加业主后交房、认证审核" />
-            <el-step title="收费与工单" description="账单、催缴、抄表、报修投诉" />
-            <el-step title="运营巡检" description="公告投票、访客、巡检采购" />
-          </el-steps>
+          <span class="muted">按顺序把小区档案跑通</span>
         </div>
-      </el-col>
-    </el-row>
+        <div class="sop-track">
+          <button
+            v-for="(step, idx) in sopSteps"
+            :key="step.to"
+            class="sop-step"
+            :class="{ done: idx < 3, current: idx === 3 }"
+            @click="$router.push(step.to)"
+          >
+            <span class="sop-index">{{ idx < 3 ? "✓" : idx + 1 }}</span>
+            <span class="sop-copy">
+              <strong>{{ step.title }}</strong>
+              <small>{{ step.desc }}</small>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h3>待办工单</h3>
+          <el-button link type="primary" @click="$router.push('/repair')">全部报修</el-button>
+        </div>
+        <el-table :data="repairs" size="small" stripe empty-text="暂无报修">
+          <el-table-column prop="repairName" label="报修人" width="90" />
+          <el-table-column prop="repairObjName" label="位置" width="110" />
+          <el-table-column prop="context" label="内容" show-overflow-tooltip />
+          <el-table-column label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="repairTag(row.state).type" size="small">{{ repairTag(row.state).label }}</el-tag>
+            </template>
+          </el-table-column>
+        </el-table>
+      </section>
+
+      <section class="panel">
+        <h3>小区档案</h3>
+        <div class="kv-list" v-if="community">
+          <div class="kv-row" v-for="item in archiveRows" :key="item.label">
+            <span class="kv-label">{{ item.label }}</span>
+            <span class="kv-value">{{ item.value || "--" }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h3>最新投诉</h3>
+          <el-button link type="primary" @click="$router.push('/complaint')">全部投诉</el-button>
+        </div>
+        <el-table :data="complaints" size="small" stripe empty-text="暂无投诉">
+          <el-table-column prop="complaintName" label="投诉人" width="90" />
+          <el-table-column label="类型" width="90">
+            <template #default="{ row }">
+              <el-tag :type="row.typeCd === '809002' ? 'success' : 'danger'" size="small">
+                {{ row.typeCd === "809002" ? "建议" : "投诉" }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="context" label="内容" show-overflow-tooltip />
+          <el-table-column label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="complaintTag(row.state).type" size="small">{{ complaintTag(row.state).label }}</el-tag>
+            </template>
+          </el-table-column>
+        </el-table>
+      </section>
+
+      <section class="panel metrics-panel">
+        <h3>房屋入住</h3>
+        <el-progress :percentage="soldRate" :stroke-width="12" striped striped-flow />
+        <p class="muted">已入住 {{ sold }} / 共 {{ rooms.length }} 套</p>
+        <h3>收费状态</h3>
+        <el-progress :percentage="feeOpenRate" status="warning" :stroke-width="12" />
+        <p class="muted">收费中 {{ feeOpen }} 笔 · 已结束 {{ feeClosed }} 笔</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h3>最新公告</h3>
+          <el-button link type="primary" @click="$router.push('/notice')">全部公告</el-button>
+        </div>
+        <el-table :data="notices" size="small" stripe empty-text="暂无公告">
+          <el-table-column prop="title" label="标题" width="160" />
+          <el-table-column prop="context" label="内容" show-overflow-tooltip />
+        </el-table>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h3>常用入口</h3>
+          <span class="muted">补齐左侧空档，一键进业务</span>
+        </div>
+        <div class="shortcut-grid">
+          <button v-for="item in shortcuts" :key="item.to" class="shortcut" @click="$router.push(item.to)">
+            <span class="shortcut-icon" :style="{ color: item.color, background: item.bg }">
+              <el-icon :size="18"><component :is="item.icon" /></el-icon>
+            </span>
+            <span>
+              <strong>{{ item.title }}</strong>
+              <small>{{ item.desc }}</small>
+            </span>
+          </button>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -135,11 +170,38 @@ const cards = [
   { key: "noticeCount", label: "公告", to: "/notice", icon: Bell, bg: "#fce7f3", color: "#db2777" }
 ];
 
+const sopSteps = [
+  { title: "建物业与小区", desc: "公司和小区档案", to: "/community" },
+  { title: "录楼栋房屋", desc: "楼栋 / 单元 / 房屋", to: "/floor" },
+  { title: "绑定业主", desc: "交房与认证审核", to: "/owner" },
+  { title: "收费与工单", desc: "账单、催缴、报修", to: "/fee" },
+  { title: "运营巡检", desc: "公告、访客、巡检", to: "/inspection" }
+];
+
+const shortcuts = [
+  { title: "房屋交房", desc: "未售房屋办理入住", to: "/room", icon: House, bg: "#eef3ff", color: "#3b82f6" },
+  { title: "欠费催缴", desc: "查看收费中账单", to: "/arrears", icon: Coin, bg: "#fff7e6", color: "#f59e0b" },
+  { title: "水电抄表", desc: "录入本期起止度数", to: "/meter", icon: Ticket, bg: "#e8f6f5", color: "#1aa39a" },
+  { title: "访客登记", desc: "来访车辆与人员", to: "/visit", icon: Position, bg: "#e0f2fe", color: "#0284c7" }
+];
+
 const sold = computed(() => rooms.value.filter((r) => r.state === "2002").length);
 const soldRate = computed(() => (rooms.value.length ? Math.round((sold.value / rooms.value.length) * 100) : 0));
 const feeOpen = computed(() => fees.value.filter((f) => f.state === "2008001").length);
 const feeClosed = computed(() => fees.value.filter((f) => f.state === "2009001").length);
 const feeOpenRate = computed(() => (fees.value.length ? Math.round((feeOpen.value / fees.value.length) * 100) : 0));
+const archiveRows = computed(() => {
+  if (!community.value) {
+    return [];
+  }
+  return [
+    { label: "名称", value: community.value.name },
+    { label: "地址", value: community.value.address },
+    { label: "电话", value: community.value.tel },
+    { label: "地标", value: community.value.nearbyLandmarks },
+    { label: "收费周期", value: `${community.value.payFeeMonth || 0} 个月` }
+  ];
+});
 
 const repairTag = (v) => REPAIR_STATE[v] || { label: v, type: "info" };
 const complaintTag = (v) => COMPLAINT_STATE[v] || { label: v, type: "info" };
@@ -163,3 +225,146 @@ onMounted(async () => {
   notices.value = n.data || [];
 });
 </script>
+
+<style scoped>
+.home-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.sop-panel {
+  grid-column: 1 / -1;
+}
+
+.sop-track {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sop-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 12px 14px;
+  border: 0.5px solid rgba(255, 255, 255, 0.55);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.28);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sop-step.done {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.sop-step.current {
+  background: rgba(0, 122, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.18);
+}
+
+.sop-index {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(60, 60, 67, 0.35);
+}
+
+.sop-step.done .sop-index {
+  background: #10b981;
+}
+
+.sop-step.current .sop-index {
+  background: #007aff;
+}
+
+.sop-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sop-copy strong,
+.shortcut strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.sop-copy small,
+.shortcut small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.metrics-panel h3 + .el-progress {
+  margin-bottom: 4px;
+}
+
+.metrics-panel h3:not(:first-child) {
+  margin-top: 16px;
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.shortcut {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border: 0.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.28);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shortcut-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.shortcut span:last-child,
+.sop-copy {
+  min-width: 0;
+}
+
+.shortcut span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+@media (max-width: 1100px) {
+  .home-board,
+  .sop-track,
+  .shortcut-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sop-panel {
+    grid-column: auto;
+  }
+}
+</style>

@@ -30,13 +30,13 @@ public class ParkingSpaceController {
         return Result.ok(parkingSpaceService.saveParkingSpace(space));
     }
 
-    @PostMapping("/parkingSpace.editParkingSpace")
+    @PutMapping("/parkingSpace.editParkingSpace")
     public Result<Void> edit(@RequestBody ParkingSpace space) {
         parkingSpaceService.editParkingSpace(space);
         return Result.ok();
     }
 
-    @PostMapping("/parkingSpace.deleteParkingSpace")
+    @DeleteMapping("/parkingSpace.deleteParkingSpace")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         parkingSpaceService.deleteParkingSpace(body.get("psId"));
         return Result.ok();

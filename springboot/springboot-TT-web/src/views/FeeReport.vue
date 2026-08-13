@@ -18,7 +18,7 @@
     </div>
     <div class="panel crud-panel">
       <h3 style="margin: 0 0 12px">费用汇总表</h3>
-      <el-table :data="items" stripe border empty-text="暂无费用数据">
+      <el-table :data="items" stripe empty-text="暂无费用数据">
         <el-table-column prop="feeName" label="费用项" />
         <el-table-column prop="billCount" label="账单数" width="120" />
         <el-table-column label="应收" width="140">

@@ -12,23 +12,23 @@
       <el-col :span="12">
         <div class="panel">
           <h3>报修</h3>
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="全部">{{ repair.total || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="待处理">{{ repair.pending || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="处理中">{{ repair.processing || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="已完成">{{ repair.done || 0 }}</el-descriptions-item>
-          </el-descriptions>
+          <div class="kv-list">
+            <div class="kv-row"><span class="kv-label">全部</span><span class="kv-value">{{ repair.total || 0 }}</span></div>
+            <div class="kv-row"><span class="kv-label">待处理</span><span class="kv-value">{{ repair.pending || 0 }}</span></div>
+            <div class="kv-row"><span class="kv-label">处理中</span><span class="kv-value">{{ repair.processing || 0 }}</span></div>
+            <div class="kv-row"><span class="kv-label">已完成</span><span class="kv-value">{{ repair.done || 0 }}</span></div>
+          </div>
         </div>
       </el-col>
       <el-col :span="12">
         <div class="panel">
           <h3>投诉建议</h3>
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="全部">{{ complaint.total || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="待处理">{{ complaint.pending || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="处理中">{{ complaint.processing || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="已完成">{{ complaint.done || 0 }}</el-descriptions-item>
-          </el-descriptions>
+          <div class="kv-list">
+            <div class="kv-row"><span class="kv-label">全部</span><span class="kv-value">{{ complaint.total || 0 }}</span></div>
+            <div class="kv-row"><span class="kv-label">待处理</span><span class="kv-value">{{ complaint.pending || 0 }}</span></div>
+            <div class="kv-row"><span class="kv-label">处理中</span><span class="kv-value">{{ complaint.processing || 0 }}</span></div>
+            <div class="kv-row"><span class="kv-label">已完成</span><span class="kv-value">{{ complaint.done || 0 }}</span></div>
+          </div>
         </div>
       </el-col>
     </el-row>

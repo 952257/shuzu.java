@@ -12,7 +12,7 @@
         <el-input v-model="feeId" placeholder="费用ID" clearable style="width: 200px" @keyup.enter="load" />
         <el-button type="primary" @click="load">查询</el-button>
       </div>
-      <el-table :data="list" v-loading="loading" stripe border empty-text="暂无已审核缴费">
+      <el-table :data="list" v-loading="loading" stripe empty-text="暂无已审核缴费">
         <el-table-column prop="detailId" label="收据号" min-width="160" />
         <el-table-column prop="feeId" label="费用ID" min-width="150" />
         <el-table-column prop="receivedAmount" label="实收" width="120">

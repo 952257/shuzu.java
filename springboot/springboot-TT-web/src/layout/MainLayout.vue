@@ -17,7 +17,7 @@
           <el-option v-for="c in communities" :key="c.communityId" :label="c.name" :value="c.communityId" />
         </el-select>
         <span class="now">{{ now }}</span>
-        <el-dropdown>
+        <el-dropdown :show-arrow="false">
           <span class="user-chip">
             <el-avatar :size="26">{{ (userName || "U").slice(0, 1) }}</el-avatar>
             {{ userName }} / {{ role === "ADMIN" ? "admin" : "staff" }}

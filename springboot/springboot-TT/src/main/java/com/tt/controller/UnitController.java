@@ -29,13 +29,13 @@ public class UnitController {
         return Result.ok(unitService.saveUnit(unit));
     }
 
-    @PostMapping("/unit.updateUnit")
+    @PutMapping("/unit.updateUnit")
     public Result<Void> update(@RequestBody Unit unit) {
         unitService.updateUnit(unit);
         return Result.ok();
     }
 
-    @PostMapping("/unit.deleteUnit")
+    @DeleteMapping("/unit.deleteUnit")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         unitService.deleteUnit(body.get("unitId"));
         return Result.ok();

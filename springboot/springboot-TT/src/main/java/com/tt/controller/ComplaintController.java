@@ -30,13 +30,13 @@ public class ComplaintController {
         return Result.ok(complaintService.saveComplaint(complaint));
     }
 
-    @PostMapping("/complaint.updateComplaint")
+    @PutMapping("/complaint.updateComplaint")
     public Result<Void> update(@RequestBody Complaint complaint) {
         complaintService.updateComplaint(complaint);
         return Result.ok();
     }
 
-    @PostMapping("/complaint.deleteComplaint")
+    @DeleteMapping("/complaint.deleteComplaint")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         complaintService.deleteComplaint(body.get("complaintId"));
         return Result.ok();

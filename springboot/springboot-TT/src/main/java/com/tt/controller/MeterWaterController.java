@@ -30,13 +30,13 @@ public class MeterWaterController {
         return Result.ok(meterWaterService.saveMeterWater(water));
     }
 
-    @PostMapping("/meterWater.updateMeterWater")
+    @PutMapping("/meterWater.updateMeterWater")
     public Result<Void> update(@RequestBody MeterWater water) {
         meterWaterService.updateMeterWater(water);
         return Result.ok();
     }
 
-    @PostMapping("/meterWater.deleteMeterWater")
+    @DeleteMapping("/meterWater.deleteMeterWater")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         meterWaterService.deleteMeterWater(body.get("waterId"));
         return Result.ok();

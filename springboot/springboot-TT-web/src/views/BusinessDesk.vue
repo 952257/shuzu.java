@@ -16,25 +16,15 @@
 
     <div class="owner-card glass-lite" v-if="desk">
       <div class="owner-avatar">{{ (owner.name || "业").slice(0, 1) }}</div>
-      <el-descriptions :column="4" size="small">
-        <el-descriptions-item label="业主编号">{{ owner.ownerId || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="业主姓名">{{ owner.name || "未绑定业主" }}</el-descriptions-item>
-        <el-descriptions-item label="联系电话">{{ owner.link || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="身份证">{{ owner.idCard || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="入住日期">{{ desk.inDate || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="性别">{{ owner.sex === "1" ? "女" : owner.sex === "0" ? "男" : "-" }}</el-descriptions-item>
-        <el-descriptions-item label="业主备注">{{ owner.remark || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="房屋号">{{ desk.roomName }}</el-descriptions-item>
-        <el-descriptions-item label="房屋面积">{{ room.builtUpArea || 0 }} ㎡</el-descriptions-item>
-        <el-descriptions-item label="房屋类型">{{ room.roomSubType === "119" ? "商铺" : "住宅" }}</el-descriptions-item>
-        <el-descriptions-item label="户型">{{ room.apartment || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="房屋状态">{{ room.state === "2002" ? "已入住" : "未售" }}</el-descriptions-item>
-        <el-descriptions-item label="室内面积">{{ room.roomArea || 0 }} ㎡</el-descriptions-item>
-        <el-descriptions-item label="房屋备注">{{ room.remark || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="账户余额">
-          <span class="money">¥ {{ Number(desk.balance || 0).toFixed(2) }}</span>
-        </el-descriptions-item>
-      </el-descriptions>
+      <div class="kv-grid">
+        <div class="kv-row" v-for="item in ownerRows" :key="item.label">
+          <span class="kv-label">{{ item.label }}</span>
+          <span class="kv-value">
+            <span v-if="item.money" class="money">{{ item.value }}</span>
+            <template v-else>{{ item.value }}</template>
+          </span>
+        </div>
+      </div>
     </div>
     <el-empty v-else description="请先查询房屋，例如 1-1-101" />
 
@@ -61,7 +51,7 @@
         <el-button type="primary" @click="batchPay">批量缴费</el-button>
         <el-button type="primary" @click="prestore">预存收款</el-button>
       </div>
-      <el-table :data="tableData" size="small" stripe border empty-text="暂无数据" v-loading="loading">
+      <el-table :data="tableData" size="small" stripe empty-text="暂无数据" v-loading="loading">
         <el-table-column v-for="col in columns" :key="col.prop" :prop="col.prop" :label="col.label" :min-width="col.width || 110" show-overflow-tooltip>
           <template #default="{ row }">
             <el-tag v-if="col.map" :type="(col.map[row[col.prop]] || {}).type || 'info'" size="small">
@@ -122,6 +112,23 @@ const rows = ref([]);
 
 const owner = computed(() => desk.value?.owner || {});
 const room = computed(() => desk.value?.room || {});
+const ownerRows = computed(() => [
+  { label: "业主编号", value: owner.value.ownerId || "-" },
+  { label: "业主姓名", value: owner.value.name || "未绑定业主" },
+  { label: "联系电话", value: owner.value.link || "-" },
+  { label: "身份证", value: owner.value.idCard || "-" },
+  { label: "入住日期", value: desk.value?.inDate || "-" },
+  { label: "性别", value: owner.value.sex === "1" ? "女" : owner.value.sex === "0" ? "男" : "-" },
+  { label: "业主备注", value: owner.value.remark || "-" },
+  { label: "房屋号", value: desk.value?.roomName || "-" },
+  { label: "房屋面积", value: `${room.value.builtUpArea || 0} ㎡` },
+  { label: "房屋类型", value: room.value.roomSubType === "119" ? "商铺" : "住宅" },
+  { label: "户型", value: room.value.apartment || "-" },
+  { label: "房屋状态", value: room.value.state === "2002" ? "已入住" : "未售" },
+  { label: "室内面积", value: `${room.value.roomArea || 0} ㎡` },
+  { label: "房屋备注", value: room.value.remark || "-" },
+  { label: "账户余额", value: `¥ ${Number(desk.value?.balance || 0).toFixed(2)}`, money: true }
+]);
 
 const columns = computed(() => {
   const maps = {

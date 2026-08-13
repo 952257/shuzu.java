@@ -29,13 +29,13 @@ public class StaffController {
         return Result.ok(staffService.addStaff(user));
     }
 
-    @PostMapping("/user.staff.modify")
+    @PutMapping("/user.staff.modify")
     public Result<Void> modify(@RequestBody User user) {
         staffService.modifyStaff(user);
         return Result.ok();
     }
 
-    @PostMapping("/user.staff.delete")
+    @DeleteMapping("/user.staff.delete")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         staffService.deleteStaff(body.get("userId"));
         return Result.ok();

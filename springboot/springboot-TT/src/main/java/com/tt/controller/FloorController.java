@@ -30,13 +30,13 @@ public class FloorController {
         return Result.ok(floorService.saveFloor(floor));
     }
 
-    @PostMapping("/floor.editFloor")
+    @PutMapping("/floor.editFloor")
     public Result<Void> edit(@RequestBody Floor floor) {
         floorService.editFloor(floor);
         return Result.ok();
     }
 
-    @PostMapping("/floor.deleteFloor")
+    @DeleteMapping("/floor.deleteFloor")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         floorService.deleteFloor(body.get("floorId"));
         return Result.ok();

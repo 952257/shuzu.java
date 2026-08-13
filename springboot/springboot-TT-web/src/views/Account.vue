@@ -21,10 +21,10 @@
             </div>
             <el-tag type="success" effect="light">现金账户</el-tag>
           </div>
-          <el-descriptions :column="1" size="small">
-            <el-descriptions-item label="业主ID">{{ item.objId }}</el-descriptions-item>
-            <el-descriptions-item label="小区ID">{{ item.communityId }}</el-descriptions-item>
-          </el-descriptions>
+          <div class="kv-list">
+            <div class="kv-row"><span class="kv-label">业主ID</span><span class="kv-value">{{ item.objId }}</span></div>
+            <div class="kv-row"><span class="kv-label">小区ID</span><span class="kv-value">{{ item.communityId }}</span></div>
+          </div>
           <div class="toolbar" style="margin: 8px 0 0">
             <el-button type="success" size="small" @click.stop="prestore(item.acctId)">预存 {{ amount }} 元</el-button>
             <el-button size="small" @click.stop="loadDetail(item.acctId)">查看明细</el-button>

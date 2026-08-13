@@ -29,13 +29,13 @@ public class OpsController {
         return Result.ok(opsService.saveOrg(org));
     }
 
-    @PostMapping("/org.updateOrg")
+    @PutMapping("/org.updateOrg")
     public Result<Void> updateOrg(@RequestBody Org org) {
         opsService.updateOrg(org);
         return Result.ok();
     }
 
-    @PostMapping("/org.deleteOrg")
+    @DeleteMapping("/org.deleteOrg")
     public Result<Void> deleteOrg(@RequestBody Map<String, String> body) {
         opsService.deleteOrg(body.get("orgId"));
         return Result.ok();
@@ -55,13 +55,13 @@ public class OpsController {
         return Result.ok(opsService.saveNotice(notice));
     }
 
-    @PostMapping("/notice.updateNotice")
+    @PutMapping("/notice.updateNotice")
     public Result<Void> updateNotice(@RequestBody Notice notice) {
         opsService.updateNotice(notice);
         return Result.ok();
     }
 
-    @PostMapping("/notice.deleteNotice")
+    @DeleteMapping("/notice.deleteNotice")
     public Result<Void> deleteNotice(@RequestBody Map<String, String> body) {
         opsService.deleteNotice(body.get("noticeId"));
         return Result.ok();
@@ -87,13 +87,13 @@ public class OpsController {
         return Result.ok(opsService.saveVote(vote));
     }
 
-    @PostMapping("/vote.updateVote")
+    @PutMapping("/vote.updateVote")
     public Result<Void> updateVote(@RequestBody Vote vote) {
         opsService.updateVote(vote);
         return Result.ok();
     }
 
-    @PostMapping("/vote.deleteVote")
+    @DeleteMapping("/vote.deleteVote")
     public Result<Void> deleteVote(@RequestBody Map<String, String> body) {
         opsService.deleteVote(body.get("voteId"));
         return Result.ok();
@@ -119,13 +119,13 @@ public class OpsController {
         return Result.ok(opsService.saveVisit(visit));
     }
 
-    @PostMapping("/visit.updateVisit")
+    @PutMapping("/visit.updateVisit")
     public Result<Void> updateVisit(@RequestBody Visit visit) {
         opsService.updateVisit(visit);
         return Result.ok();
     }
 
-    @PostMapping("/visit.deleteVisit")
+    @DeleteMapping("/visit.deleteVisit")
     public Result<Void> deleteVisit(@RequestBody Map<String, String> body) {
         opsService.deleteVisit(body.get("visitId"));
         return Result.ok();
@@ -157,13 +157,13 @@ public class OpsController {
         return Result.ok(opsService.saveInspection(inspection));
     }
 
-    @PostMapping("/inspection.updateInspection")
+    @PutMapping("/inspection.updateInspection")
     public Result<Void> updateInspection(@RequestBody Inspection inspection) {
         opsService.updateInspection(inspection);
         return Result.ok();
     }
 
-    @PostMapping("/inspection.deleteInspection")
+    @DeleteMapping("/inspection.deleteInspection")
     public Result<Void> deleteInspection(@RequestBody Map<String, String> body) {
         opsService.deleteInspection(body.get("taskId"));
         return Result.ok();
@@ -189,13 +189,13 @@ public class OpsController {
         return Result.ok(opsService.savePurchase(purchase));
     }
 
-    @PostMapping("/purchase.updatePurchase")
+    @PutMapping("/purchase.updatePurchase")
     public Result<Void> updatePurchase(@RequestBody Purchase purchase) {
         opsService.updatePurchase(purchase);
         return Result.ok();
     }
 
-    @PostMapping("/purchase.deletePurchase")
+    @DeleteMapping("/purchase.deletePurchase")
     public Result<Void> deletePurchase(@RequestBody Map<String, String> body) {
         opsService.deletePurchase(body.get("applyId"));
         return Result.ok();
@@ -221,13 +221,13 @@ public class OpsController {
         return Result.ok(opsService.saveContract(contract));
     }
 
-    @PostMapping("/contract.updateContract")
+    @PutMapping("/contract.updateContract")
     public Result<Void> updateContract(@RequestBody Contract contract) {
         opsService.updateContract(contract);
         return Result.ok();
     }
 
-    @PostMapping("/contract.deleteContract")
+    @DeleteMapping("/contract.deleteContract")
     public Result<Void> deleteContract(@RequestBody Map<String, String> body) {
         opsService.deleteContract(body.get("contractId"));
         return Result.ok();
@@ -246,13 +246,13 @@ public class OpsController {
         return Result.ok(opsService.saveDiscount(discount));
     }
 
-    @PostMapping("/feeDiscount.updateDiscount")
+    @PutMapping("/feeDiscount.updateDiscount")
     public Result<Void> updateDiscount(@RequestBody Discount discount) {
         opsService.updateDiscount(discount);
         return Result.ok();
     }
 
-    @PostMapping("/feeDiscount.deleteDiscount")
+    @DeleteMapping("/feeDiscount.deleteDiscount")
     public Result<Void> deleteDiscount(@RequestBody Map<String, String> body) {
         opsService.deleteDiscount(body.get("discountId"));
         return Result.ok();

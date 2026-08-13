@@ -53,13 +53,13 @@ public class RoomController {
         return Result.ok(roomService.saveRoom(room));
     }
 
-    @PostMapping("/room.updateRoom")
+    @PutMapping("/room.updateRoom")
     public Result<Void> update(@RequestBody Room room) {
         roomService.updateRoom(room);
         return Result.ok();
     }
 
-    @PostMapping("/room.deleteRoom")
+    @DeleteMapping("/room.deleteRoom")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         roomService.deleteRoom(body.get("roomId"));
         return Result.ok();

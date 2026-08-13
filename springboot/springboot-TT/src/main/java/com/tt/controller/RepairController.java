@@ -30,13 +30,13 @@ public class RepairController {
         return Result.ok(repairService.saveRepair(repair));
     }
 
-    @PostMapping("/repair.updateRepair")
+    @PutMapping("/repair.updateRepair")
     public Result<Void> update(@RequestBody Repair repair) {
         repairService.updateRepair(repair);
         return Result.ok();
     }
 
-    @PostMapping("/repair.deleteRepair")
+    @DeleteMapping("/repair.deleteRepair")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         repairService.deleteRepair(body.get("repairId"));
         return Result.ok();

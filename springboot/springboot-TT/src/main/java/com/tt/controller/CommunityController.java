@@ -30,13 +30,13 @@ public class CommunityController {
         return Result.ok(communityService.saveCommunity(community));
     }
 
-    @PostMapping("/community.updateCommunity")
+    @PutMapping("/community.updateCommunity")
     public Result<Void> update(@RequestBody Community community) {
         communityService.updateCommunity(community);
         return Result.ok();
     }
 
-    @PostMapping("/community.deleteCommunity")
+    @DeleteMapping("/community.deleteCommunity")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         communityService.deleteCommunity(body.get("communityId"));
         return Result.ok();

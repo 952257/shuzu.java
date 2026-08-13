@@ -17,21 +17,21 @@
       <el-col :span="12">
         <div class="panel">
           <h3>收费汇总</h3>
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="应收">¥ {{ Number(summary.receivable || 0).toFixed(2) }}</el-descriptions-item>
-            <el-descriptions-item label="欠费">¥ {{ Number(summary.arrears || 0).toFixed(2) }}</el-descriptions-item>
-            <el-descriptions-item label="实收">¥ {{ Number(summary.received || 0).toFixed(2) }}</el-descriptions-item>
-          </el-descriptions>
+          <div class="kv-list">
+            <div class="kv-row"><span class="kv-label">应收</span><span class="kv-value">¥ {{ Number(summary.receivable || 0).toFixed(2) }}</span></div>
+            <div class="kv-row"><span class="kv-label">欠费</span><span class="kv-value">¥ {{ Number(summary.arrears || 0).toFixed(2) }}</span></div>
+            <div class="kv-row"><span class="kv-label">实收</span><span class="kv-value">¥ {{ Number(summary.received || 0).toFixed(2) }}</span></div>
+          </div>
         </div>
       </el-col>
       <el-col :span="12">
         <div class="panel">
           <h3>工单</h3>
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="报修待处理">{{ work.repair?.pending || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="投诉待处理">{{ work.complaint?.pending || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="报修已完成">{{ work.repair?.done || 0 }}</el-descriptions-item>
-          </el-descriptions>
+          <div class="kv-list">
+            <div class="kv-row"><span class="kv-label">报修待处理</span><span class="kv-value">{{ work.repair?.pending || 0 }}</span></div>
+            <div class="kv-row"><span class="kv-label">投诉待处理</span><span class="kv-value">{{ work.complaint?.pending || 0 }}</span></div>
+            <div class="kv-row"><span class="kv-label">报修已完成</span><span class="kv-value">{{ work.repair?.done || 0 }}</span></div>
+          </div>
         </div>
       </el-col>
     </el-row>

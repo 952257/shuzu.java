@@ -36,7 +36,7 @@
         <div style="flex: 1"></div>
         <el-button v-if="saveApi" type="success" :icon="Plus" @click="openAdd">{{ addText }}</el-button>
       </div>
-      <el-table :data="list" v-loading="loading" stripe border empty-text="暂无数据">
+      <el-table :data="list" v-loading="loading" stripe empty-text="暂无数据">
         <el-table-column v-for="col in columns" :key="col.prop" :prop="col.prop" :label="col.label" :min-width="col.width || 120" show-overflow-tooltip>
           <template #default="{ row }">
             <el-tag v-if="col.type === 'tag' && col.map" :type="tagOf(col.map, row[col.prop]).type" effect="light" round>
@@ -192,7 +192,7 @@ const openEdit = (rowData) => {
 
 const save = async () => {
   const api = isEdit.value ? props.updateApi : props.saveApi;
-  const res = await http.post(api, form);
+  const res = isEdit.value ? await http.put(api, form) : await http.post(api, form);
   if (res.code === 0) {
     ElMessage.success("保存成功");
     dialog.value = false;
@@ -203,7 +203,7 @@ const save = async () => {
 const remove = async (rowData) => {
   await ElMessageBox.confirm(`确认${props.deleteText}这条记录？`, "提示", { type: "warning" });
   const body = props.deleteKey ? { [props.deleteKey]: rowData[props.deleteKey] } : rowData;
-  const res = await http.post(props.deleteApi, body);
+  const res = await http.delete(props.deleteApi, { data: body });
   if (res.code === 0) {
     ElMessage.success("操作成功");
     load();

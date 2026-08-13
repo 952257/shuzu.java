@@ -38,13 +38,13 @@ public class OwnerController {
         return Result.ok(ownerService.saveOwner(owner));
     }
 
-    @PostMapping("/owner.editOwner")
+    @PutMapping("/owner.editOwner")
     public Result<Void> edit(@RequestBody Owner owner) {
         ownerService.editOwner(owner);
         return Result.ok();
     }
 
-    @PostMapping("/owner.deleteOwner")
+    @DeleteMapping("/owner.deleteOwner")
     public Result<Void> delete(@RequestBody Map<String, String> body) {
         ownerService.deleteOwner(body.get("memberId"));
         return Result.ok();
