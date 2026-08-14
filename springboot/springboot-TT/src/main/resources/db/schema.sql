@@ -538,3 +538,6 @@ INSERT INTO tt_community_setting (setting_id, community_id, setting_group, setti
 ('S009', '2022081539020475', 'repair', 'repairSwitch', '维修工单', '1', '1开启 2关闭'),
 ('S010', '2022081539020475', 'refund', 'refundReceipt', '退费收据开关', '1', '1开启 2关闭'),
 ('S011', '2022081539020475', 'sms', 'aliSms', '阿里短信', '2', '1开启 2关闭');
+
+-- 更丰富的演示数据（楼栋/房屋/业主/费用/工单等）见 seed_demo.sql
+-- 空库初始化建议：先执行本文件，再执行 seed_demo.sql

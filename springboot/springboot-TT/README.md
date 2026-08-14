@@ -74,6 +74,13 @@ jdbc:mysql://localhost:3306/TT?...
 
 ```bash
 mysql -u root -p < src/main/resources/db/schema.sql
+mysql -u root -p TT < src/main/resources/db/seed_demo.sql
+```
+
+已有库只补演示数据（不会删表，主键已存在则跳过）：
+
+```bash
+mysql -u root -p TT < src/main/resources/db/seed_demo.sql
 ```
 
 补充表（组织、公告、配置等）在：
@@ -87,14 +94,16 @@ mysql -u root -p < src/main/resources/db/schema.sql
 
 | 说明 | 值 |
 |---|---|
-| 小区 | `2022081539020475` 测试小区 |
+| 小区 | `2022081539020475` 测试小区；`2022081539020476` 阳光花园 |
 | 物业 | `10001` HC物业公司 |
-| 楼栋 / 单元 | `3022081500000001` 1号楼 / `4022081500000001` 1单元 |
+| 登录 | `admin` / `admin`，员工 `wangong`、`zhaokefu` 密码均为 `admin` |
+| 楼栋 | 测试小区 1/2/3 号楼；阳光花园 1 号楼 |
 | 房屋 101（已入住） | `5022081500000001` |
-| 房屋 102（未售） | `5022081500000002` |
 | 业主李明 | `6022081500000001` |
 | 账户 | `C022081500000001` |
 | 物业费账单 | `B022081500000001` |
+
+更全的演示数据在 `src/main/resources/db/seed_demo.sql`：约 30 套房、20 位业主、欠费账单、报修投诉、抄表、车位车辆等。
 
 ---
 
