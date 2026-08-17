@@ -9,7 +9,7 @@
     delete-key="waterId"
     add-text="抄表"
     edit-text="编辑抄表"
-    :default-query="{ communityId: '2022081539020475' }"
+    :default-query="{ communityId: cid }"
     :query-fields="[{ prop: 'meterType', label: '表类型', type: 'select', options: [{ label: '水表', value: '2020' }, { label: '电表', value: '3030' }] }]"
     :columns="[
       { prop: 'objId', label: '房屋ID', width: 160 },
@@ -24,11 +24,13 @@
       { prop: 'preDegrees', label: '上期', type: 'number' },
       { prop: 'curDegrees', label: '本期', type: 'number' }
     ]"
-    :default-form="{ communityId: '2022081539020475', objId: '5022081500000001', meterType: '2020', preDegrees: 0, curDegrees: 10 }"
+    :default-form="{ communityId: cid, objId: '', meterType: '2020', preDegrees: 0, curDegrees: 10 }"
   />
 </template>
 
 <script setup>
 import CrudPage from "@/components/CrudPage.vue";
 import { METER_TYPE } from "@/utils/dict";
+import { getCommunityId } from "@/utils/community";
+const cid = getCommunityId();
 </script>

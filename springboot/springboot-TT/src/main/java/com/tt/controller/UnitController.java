@@ -17,11 +17,12 @@ public class UnitController {
     private UnitService unitService;
 
     @GetMapping("/unit.queryUnits")
-    public PageResult<Unit> list(@RequestParam(required = false) String floorId,
+    public PageResult<Unit> list(@RequestParam(required = false) String communityId,
+                                 @RequestParam(required = false) String floorId,
                                  @RequestParam(required = false) String unitNum,
                                  @RequestParam(required = false) Integer page,
                                  @RequestParam(required = false) Integer row) {
-        return unitService.queryUnits(floorId, unitNum, page, row);
+        return unitService.queryUnits(communityId, floorId, unitNum, page, row);
     }
 
     @PostMapping("/unit.saveUnit")

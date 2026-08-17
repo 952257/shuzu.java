@@ -9,7 +9,7 @@
     delete-key="memberId"
     add-text="添加业主"
     edit-text="编辑业主"
-    :default-query="{ communityId: '2022081539020475', ownerTypeCd: '1001' }"
+    :default-query="{ communityId: cid, ownerTypeCd: '1001' }"
     :query-fields="[{ prop: 'name', label: '业主姓名' }, { prop: 'link', label: '手机号' }]"
     :columns="[
       { prop: 'name', label: '姓名' },
@@ -27,11 +27,13 @@
       { prop: 'idCard', label: '证件号' },
       { prop: 'address', label: '住址' }
     ]"
-    :default-form="{ communityId: '2022081539020475', name: '', link: '', idCard: '', sex: '0', ownerTypeCd: '1001', personRole: '1', address: '' }"
+    :default-form="{ communityId: cid, name: '', link: '', idCard: '', sex: '0', ownerTypeCd: '1001', personRole: '1', address: '' }"
   />
 </template>
 
 <script setup>
 import CrudPage from "@/components/CrudPage.vue";
 import { PERSON_ROLE, SEX } from "@/utils/dict";
+import { getCommunityId } from "@/utils/community";
+const cid = getCommunityId();
 </script>

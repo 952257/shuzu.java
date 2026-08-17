@@ -31,4 +31,8 @@ public class QueryHelper {
     public static void requireHasText(String value, String msg) {
         require(StringUtils.hasText(value), msg);
     }
+
+    public static void requireCommunityId(String communityId) {
+        requireHasText(communityId, "小区ID不能为空");
+    }
 }

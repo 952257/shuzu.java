@@ -29,7 +29,7 @@
       { prop: 'builtUpArea', label: '建筑面积', type: 'number' },
       { prop: 'roomRent', label: '租金', type: 'number', step: 0.01 }
     ]"
-    :default-form="{ communityId: cid, unitId: '4022081500000001', roomNum: '', layer: '1', apartment: '商铺', builtUpArea: 45, roomArea: 40, roomRent: 0, state: '2001', roomSubType: '119' }"
+    :default-form="{ communityId: cid, unitId: '', roomNum: '', layer: '1', apartment: '商铺', builtUpArea: 45, roomArea: 40, roomRent: 0, state: '2001', roomSubType: '119' }"
     :extra-actions="[
       { label: '交铺', type: 'success', api: '/room.sellRoom', body: (row) => ({ roomId: row.roomId }), prompt: { key: 'ownerId', title: '交铺', message: '请输入业主ID' }, msg: '交铺成功' },
       { label: '退铺', type: 'warning', api: '/room.exitRoom', body: (row) => ({ roomId: row.roomId }), prompt: { key: 'ownerId', title: '退铺', message: '请输入业主ID' }, msg: '已退铺' }

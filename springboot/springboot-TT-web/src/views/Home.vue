@@ -208,8 +208,8 @@ const complaintTag = (v) => COMPLAINT_STATE[v] || { label: v, type: "info" };
 
 onMounted(async () => {
   const [s, c, r, rp, cp, f, n] = await Promise.all([
-    http.get("/dashboard.stats"),
-    http.get("/community.listCommunitys", { params: { page: 1, row: 1 } }),
+    http.get("/dashboard.stats", { params: { communityId: cid } }),
+    http.get("/community.listCommunitys", { params: { communityId: cid, page: 1, row: 1 } }),
     http.get("/room.queryRooms", { params: { communityId: cid, page: 1, row: 50 } }),
     http.get("/repair.listRepairs", { params: { communityId: cid, page: 1, row: 5 } }),
     http.get("/complaint.listComplaints", { params: { communityId: cid, page: 1, row: 5 } }),

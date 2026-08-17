@@ -58,8 +58,8 @@ onMounted(async () => {
   timer = setInterval(tick, 1000);
   const cid = getCommunityId();
   const [s, c, f, w] = await Promise.all([
-    http.get("/dashboard.stats"),
-    http.get("/community.listCommunitys", { params: { page: 1, row: 1 } }),
+    http.get("/dashboard.stats", { params: { communityId: cid } }),
+    http.get("/community.listCommunitys", { params: { communityId: cid, page: 1, row: 1 } }),
     http.get("/report.feeSummary", { params: { communityId: cid } }),
     http.get("/report.workSummary", { params: { communityId: cid } })
   ]);

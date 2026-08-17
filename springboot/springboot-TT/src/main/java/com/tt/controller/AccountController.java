@@ -1,7 +1,10 @@
 package com.tt.controller;
 
 import com.tt.common.PageResult;
+import com.tt.common.QueryHelper;
 import com.tt.common.Result;
+import com.tt.common.ServiceException;
+import com.tt.common.ServiceExceptionEnum;
 import com.tt.po.Account;
 import com.tt.po.AccountDetail;
 import com.tt.service.AccountService;
@@ -28,7 +31,14 @@ public class AccountController {
 
     @PostMapping("/account.ownerPrestoreAccount")
     public Result<String> prestore(@RequestBody Map<String, String> body) {
-        BigDecimal amount = new BigDecimal(body.get("amount"));
+        String amountText = body.get("amount");
+        QueryHelper.requireHasText(amountText, "预存金额不能为空");
+        BigDecimal amount;
+        try {
+            amount = new BigDecimal(amountText.trim());
+        } catch (NumberFormatException e) {
+            throw new ServiceException(ServiceExceptionEnum.PARAM_ERROR.getCode(), "预存金额格式不正确");
+        }
         return Result.ok(accountService.ownerPrestoreAccount(body.get("acctId"), amount, body.get("remark")));
     }
 

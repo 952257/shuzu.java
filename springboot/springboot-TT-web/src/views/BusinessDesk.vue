@@ -318,7 +318,7 @@ const urgeOne = async (row) => {
 
 const batchPay = async () => {
   await ElMessageBox.confirm("确认对该房屋下收费中账单批量缴费？");
-  const res = await http.post("/fee.batchPayFee", { payerObjId: roomId() });
+  const res = await http.post("/fee.batchPayFee", { communityId: cid(), payerObjId: roomId() });
   if (res.code === 0) {
     ElMessage.success(`已提交 ${res.data || 0} 笔缴费`);
     loadTab();

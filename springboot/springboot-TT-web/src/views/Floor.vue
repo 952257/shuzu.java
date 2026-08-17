@@ -9,7 +9,7 @@
     delete-key="floorId"
     add-text="添加楼栋"
     edit-text="编辑楼栋"
-    :default-query="{ communityId: '2022081539020475' }"
+    :default-query="{ communityId: cid }"
     :query-fields="[{ prop: 'communityId', label: '小区ID' }, { prop: 'name', label: '楼栋名称' }]"
     :columns="[
       { prop: 'floorId', label: '楼栋ID', width: 160 },
@@ -24,10 +24,12 @@
       { prop: 'name', label: '名称' },
       { prop: 'floorArea', label: '面积', type: 'number' }
     ]"
-    :default-form="{ communityId: '2022081539020475', floorNum: '', name: '', floorArea: 0, seq: 1 }"
+    :default-form="{ communityId: cid, floorNum: '', name: '', floorArea: 0, seq: 1 }"
   />
 </template>
 
 <script setup>
 import CrudPage from "@/components/CrudPage.vue";
+import { getCommunityId } from "@/utils/community";
+const cid = getCommunityId();
 </script>

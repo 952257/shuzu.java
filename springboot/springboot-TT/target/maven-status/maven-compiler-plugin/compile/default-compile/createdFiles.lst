@@ -23,6 +23,7 @@ com/tt/po/Discount.class
 com/tt/controller/ParkingSpaceController.class
 com/tt/controller/DashboardController.class
 com/tt/controller/BizDeskController.class
+com/tt/common/PhysicalServiceImpl.class
 com/tt/mapper/CommunitySettingMapper.class
 com/tt/po/Repair.class
 com/tt/mapper/FeeConfigMapper.class
@@ -78,6 +79,7 @@ com/tt/po/UserLogin.class
 com/tt/mapper/OwnerCarMapper.class
 com/tt/common/GlobalExceptionHandler.class
 com/tt/mapper/NoticeMapper.class
+com/tt/common/CommunityGuard.class
 com/tt/po/Floor.class
 com/tt/mapper/UserMapper.class
 com/tt/mapper/AccountMapper.class
@@ -96,6 +98,7 @@ com/tt/controller/RoomController.class
 com/tt/po/Unit.class
 com/tt/mapper/PurchaseMapper.class
 com/tt/TtApplication.class
+com/tt/common/PhysicalDelete.class
 com/tt/mapper/MeterWaterMapper.class
 com/tt/controller/FloorController.class
 com/tt/mapper/PayFeeMapper.class

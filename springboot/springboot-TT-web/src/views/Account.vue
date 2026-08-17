@@ -69,6 +69,7 @@ import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import http from "@/api/http";
 import { DETAIL_STATE, DETAIL_TYPE } from "@/utils/dict";
+import { getCommunityId } from "@/utils/community";
 
 const list = ref([]);
 const details = ref([]);
@@ -76,7 +77,7 @@ const amount = ref(100);
 const currentAcct = ref("");
 
 const load = async () => {
-  const res = await http.get("/account.queryOwnerAccount", { params: { communityId: "2022081539020475", page: 1, row: 20 } });
+  const res = await http.get("/account.queryOwnerAccount", { params: { communityId: getCommunityId(), page: 1, row: 20 } });
   if (res.code === 0) {
     list.value = res.data || [];
     if (list.value[0]) {

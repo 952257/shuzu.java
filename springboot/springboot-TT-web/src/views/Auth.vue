@@ -7,7 +7,7 @@
     delete-key="appUserId"
     add-text="提交认证"
     :op-width="200"
-    :default-query="{ communityId: '2022081539020475' }"
+    :default-query="{ communityId: cid }"
     :query-fields="[{ prop: 'state', label: '状态', type: 'select', options: [{ label: '待审核', value: '10000' }, { label: '通过', value: '12000' }, { label: '拒绝', value: '13000' }] }]"
     :columns="[
       { prop: 'appUserName', label: '姓名' },
@@ -24,7 +24,7 @@
       { prop: 'roomName', label: '房屋' },
       { prop: 'memberId', label: '业主ID' }
     ]"
-    :default-form="{ communityId: '2022081539020475', appUserName: '', link: '', idCard: '', roomName: '1-1-101', memberId: '6022081500000001' }"
+    :default-form="{ communityId: cid, appUserName: '', link: '', idCard: '', roomName: '', memberId: '' }"
     :extra-actions="[
       { label: '通过', type: 'success', api: '/owner.auditAuthOwner', body: (row) => ({ appUserId: row.appUserId, state: '12000' }), msg: '已通过' },
       { label: '拒绝', type: 'danger', api: '/owner.auditAuthOwner', body: (row) => ({ appUserId: row.appUserId, state: '13000', remark: '资料不符' }), msg: '已拒绝' }
@@ -35,4 +35,6 @@
 <script setup>
 import CrudPage from "@/components/CrudPage.vue";
 import { AUTH_STATE } from "@/utils/dict";
+import { getCommunityId } from "@/utils/community";
+const cid = getCommunityId();
 </script>

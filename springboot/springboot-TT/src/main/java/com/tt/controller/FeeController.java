@@ -72,7 +72,7 @@ public class FeeController {
 
     @PostMapping("/fee.batchPayFee")
     public Result<Integer> batchPay(@RequestBody Map<String, String> body) {
-        return Result.ok(feeService.payFeesByPayer(body.get("payerObjId")));
+        return Result.ok(feeService.payFeesByPayer(body.get("communityId"), body.get("payerObjId")));
     }
 
     @DeleteMapping("/fee.deleteFee")

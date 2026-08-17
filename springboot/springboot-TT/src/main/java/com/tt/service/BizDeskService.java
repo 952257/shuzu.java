@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tt.common.IdGenerator;
 import com.tt.common.PageResult;
 import com.tt.common.PasswordUtil;
+import com.tt.common.CommunityGuard;
 import com.tt.common.QueryHelper;
 import com.tt.common.UserContext;
 import com.tt.mapper.*;
@@ -40,8 +41,11 @@ public class BizDeskService {
     private UserLoginMapper userLoginMapper;
     @Resource
     private CommunitySettingMapper communitySettingMapper;
+    @Resource
+    private StoreUserMapper storeUserMapper;
 
     public Map<String, Object> queryRoomByCode(String communityId, String roomCode) {
+        CommunityGuard.requireCommunity(communityId);
         QueryHelper.requireHasText(roomCode, "请输入房屋编号");
         Room room = findRoom(communityId, roomCode.trim());
         QueryHelper.require(room != null, "未找到房屋，请按 楼栋-单元-房号 输入，如 1-1-101");
@@ -51,13 +55,14 @@ public class BizDeskService {
     public Map<String, Object> queryDeskByRoomId(String roomId) {
         QueryHelper.requireHasText(roomId, "房屋ID不能为空");
         Room room = roomMapper.selectById(roomId);
-        QueryHelper.require(room != null, "房屋不存在");
+        CommunityGuard.mustBelong(room, Room::getCommunityId, "房屋不存在");
         return buildDesk(room);
     }
 
     public List<Map<String, Object>> listRoomOptions(String communityId) {
+        CommunityGuard.requireCommunity(communityId);
         LambdaQueryWrapper<Room> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StringUtils.hasText(communityId), Room::getCommunityId, communityId)
+        wrapper.eq(Room::getCommunityId, communityId)
                 .orderByAsc(Room::getRoomNum);
         List<Room> rooms = roomMapper.selectList(wrapper);
         List<Map<String, Object>> list = new ArrayList<>();
@@ -78,13 +83,28 @@ public class BizDeskService {
         QueryHelper.requireHasText(newPass, "请输入新密码");
         User user = userMapper.selectById(UserContext.getUserId());
         QueryHelper.require(user != null, "用户不存在");
-        QueryHelper.require(PasswordUtil.passwdMd5(oldPass).equalsIgnoreCase(user.getPassword()), "原密码不正确");
-        user.setPassword(PasswordUtil.passwdMd5(newPass));
+        QueryHelper.require(PasswordUtil.matches(oldPass, user.getPassword()), "原密码不正确");
+        user.setPassword(PasswordUtil.encode(newPass));
         userMapper.updateById(user);
     }
 
     public PageResult<UserLogin> listLoginLogs(Integer page, Integer row) {
         LambdaQueryWrapper<UserLogin> wrapper = new LambdaQueryWrapper<>();
+        if (!UserContext.isAdmin()) {
+            wrapper.eq(UserLogin::getUserId, UserContext.getUserId());
+        } else {
+            QueryHelper.requireHasText(UserContext.getStoreId(), "请重新登录后再操作");
+            List<String> userIds = storeUserMapper.selectList(new LambdaQueryWrapper<StoreUser>()
+                            .eq(StoreUser::getStoreId, UserContext.getStoreId()))
+                    .stream()
+                    .map(StoreUser::getUserId)
+                    .collect(java.util.stream.Collectors.toList());
+            if (userIds.isEmpty()) {
+                wrapper.eq(UserLogin::getUserId, "-1");
+            } else {
+                wrapper.in(UserLogin::getUserId, userIds);
+            }
+        }
         wrapper.orderByDesc(UserLogin::getLoginTime);
         int p = QueryHelper.page(page);
         int r = QueryHelper.row(row);
@@ -94,15 +114,16 @@ public class BizDeskService {
     }
 
     public List<CommunitySetting> listSettings(String communityId, String settingGroup) {
+        CommunityGuard.requireCommunity(communityId);
         LambdaQueryWrapper<CommunitySetting> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StringUtils.hasText(communityId), CommunitySetting::getCommunityId, communityId)
+        wrapper.eq(CommunitySetting::getCommunityId, communityId)
                 .eq(StringUtils.hasText(settingGroup), CommunitySetting::getSettingGroup, settingGroup)
                 .orderByAsc(CommunitySetting::getSettingKey);
         return communitySettingMapper.selectList(wrapper);
     }
 
     public void saveSettings(String communityId, List<CommunitySetting> settings) {
-        QueryHelper.requireHasText(communityId, "小区ID不能为空");
+        CommunityGuard.requireCommunity(communityId);
         QueryHelper.require(settings != null && !settings.isEmpty(), "配置不能为空");
         for (CommunitySetting item : settings) {
             QueryHelper.requireHasText(item.getSettingKey(), "配置项不能为空");
@@ -130,7 +151,7 @@ public class BizDeskService {
             String unitNum = parts[1].trim();
             String roomNum = parts[2].trim();
             Floor floor = floorMapper.selectOne(new LambdaQueryWrapper<Floor>()
-                    .eq(StringUtils.hasText(communityId), Floor::getCommunityId, communityId)
+                    .eq(Floor::getCommunityId, communityId)
                     .eq(Floor::getFloorNum, floorNum)
                     .last("limit 1"));
             if (floor == null) {
@@ -149,7 +170,7 @@ public class BizDeskService {
                     .last("limit 1"));
         }
         return roomMapper.selectOne(new LambdaQueryWrapper<Room>()
-                .eq(StringUtils.hasText(communityId), Room::getCommunityId, communityId)
+                .eq(Room::getCommunityId, communityId)
                 .eq(Room::getRoomNum, roomCode)
                 .last("limit 1"));
     }

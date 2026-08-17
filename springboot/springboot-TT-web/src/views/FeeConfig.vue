@@ -10,7 +10,7 @@
     delete-key="configId"
     add-text="添加费用项"
     edit-text="编辑费用项"
-    :default-query="{ communityId: '2022081539020475' }"
+    :default-query="{ communityId: cid }"
     :query-fields="[{ prop: 'feeName', label: '费用项' }]"
     :columns="[
       { prop: 'feeName', label: '名称' },
@@ -25,10 +25,12 @@
       { prop: 'squarePrice', label: '单价', type: 'number', step: 0.1 },
       { prop: 'paymentCycle', label: '周期' }
     ]"
-    :default-form="{ communityId: '2022081539020475', feeTypeCd: '888800010001', feeName: '物业费', feeFlag: '1003006', squarePrice: 1.5, additionalAmount: 0, paymentCycle: '12' }"
+    :default-form="{ communityId: cid, feeTypeCd: '888800010001', feeName: '物业费', feeFlag: '1003006', squarePrice: 1.5, additionalAmount: 0, paymentCycle: '12' }"
   />
 </template>
 
 <script setup>
 import CrudPage from "@/components/CrudPage.vue";
+import { getCommunityId } from "@/utils/community";
+const cid = getCommunityId();
 </script>

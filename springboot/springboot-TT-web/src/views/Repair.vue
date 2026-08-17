@@ -10,7 +10,7 @@
     add-text="登记报修"
     edit-text="编辑报修"
     :op-width="240"
-    :default-query="{ communityId: '2022081539020475' }"
+    :default-query="{ communityId: cid }"
     :query-fields="[{ prop: 'repairName', label: '报修人' }]"
     :columns="[
       { prop: 'repairName', label: '报修人' },
@@ -27,7 +27,7 @@
       { prop: 'repairObjName', label: '位置' },
       { prop: 'context', label: '内容', type: 'textarea' }
     ]"
-    :default-form="{ communityId: '2022081539020475', repairName: '', tel: '', context: '', repairObjName: '1-1-101' }"
+    :default-form="{ communityId: cid, repairName: '', tel: '', context: '', repairObjName: '' }"
     :extra-actions="[
       { label: '派单', api: '/repair.dispatchRepair', body: (row) => ({ repairId: row.repairId, staffId: '1000000002', staffName: '吴学文' }), msg: '已派单' },
       { label: '完成', type: 'success', api: '/repair.finishRepair', body: (row) => ({ repairId: row.repairId }), msg: '已完成' }
@@ -38,4 +38,6 @@
 <script setup>
 import CrudPage from "@/components/CrudPage.vue";
 import { REPAIR_STATE } from "@/utils/dict";
+import { getCommunityId } from "@/utils/community";
+const cid = getCommunityId();
 </script>

@@ -9,7 +9,7 @@
     delete-text="结束费用"
     add-text="创建费用"
     :op-width="200"
-    :default-query="{ communityId: '2022081539020475' }"
+    :default-query="{ communityId: cid }"
     :query-fields="[{ prop: 'payerObjId', label: '房屋/车位ID' }]"
     :columns="[
       { prop: 'feeName', label: '费用' },
@@ -23,7 +23,7 @@
       { prop: 'payerObjId', label: '房屋/车位ID' },
       { prop: 'amount', label: '金额', type: 'number', step: 0.01 }
     ]"
-    :default-form="{ communityId: '2022081539020475', configId: 'A022081500000001', payerObjId: '5022081500000001', payerObjType: '3333', amount: 134.25 }"
+    :default-form="{ communityId: cid, configId: '', payerObjId: '', payerObjType: '3333', amount: 0 }"
     :extra-actions="[
       { label: '缴费', type: 'success', api: '/fee.payFee', body: (row) => ({ feeId: row.feeId, receivedAmount: row.amount, cycles: 1 }), msg: '缴费成功，待财务审核' }
     ]"
@@ -33,4 +33,6 @@
 <script setup>
 import CrudPage from "@/components/CrudPage.vue";
 import { FEE_STATE } from "@/utils/dict";
+import { getCommunityId } from "@/utils/community";
+const cid = getCommunityId();
 </script>

@@ -9,7 +9,7 @@
     delete-key="complaintId"
     add-text="登记投诉"
     edit-text="编辑投诉"
-    :default-query="{ communityId: '2022081539020475' }"
+    :default-query="{ communityId: cid }"
     :query-fields="[{ prop: 'typeCd', label: '类型', type: 'select', options: [{ label: '投诉', value: '809001' }, { label: '建议', value: '809002' }] }]"
     :columns="[
       { prop: 'complaintName', label: '投诉人' },
@@ -25,7 +25,7 @@
       { prop: 'typeCd', label: '类型', type: 'select', options: [{ label: '投诉', value: '809001' }, { label: '建议', value: '809002' }] },
       { prop: 'context', label: '内容', type: 'textarea' }
     ]"
-    :default-form="{ communityId: '2022081539020475', typeCd: '809001', complaintName: '', tel: '', context: '' }"
+    :default-form="{ communityId: cid, typeCd: '809001', complaintName: '', tel: '', context: '' }"
     :extra-actions="[
       { label: '处理', type: 'success', api: '/complaint.auditComplaint', body: (row) => ({ complaintId: row.complaintId }), msg: '已处理' }
     ]"
@@ -35,4 +35,6 @@
 <script setup>
 import CrudPage from "@/components/CrudPage.vue";
 import { COMPLAINT_STATE, COMPLAINT_TYPE } from "@/utils/dict";
+import { getCommunityId } from "@/utils/community";
+const cid = getCommunityId();
 </script>

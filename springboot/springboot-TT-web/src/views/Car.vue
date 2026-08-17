@@ -9,7 +9,7 @@
     delete-key="carId"
     add-text="添加车辆"
     edit-text="编辑车辆"
-    :default-query="{ communityId: '2022081539020475' }"
+    :default-query="{ communityId: cid }"
     :query-fields="[{ prop: 'carNum', label: '车牌号' }, { prop: 'ownerId', label: '业主ID' }]"
     :columns="[
       { prop: 'carNum', label: '车牌' },
@@ -26,10 +26,12 @@
       { prop: 'carColor', label: '颜色' },
       { prop: 'psId', label: '车位ID' }
     ]"
-    :default-form="{ communityId: '2022081539020475', ownerId: '6022081500000001', carNum: '', carBrand: '', carColor: '', psId: '' }"
+    :default-form="{ communityId: cid, ownerId: '', carNum: '', carBrand: '', carColor: '', psId: '' }"
   />
 </template>
 
 <script setup>
 import CrudPage from "@/components/CrudPage.vue";
+import { getCommunityId } from "@/utils/community";
+const cid = getCommunityId();
 </script>

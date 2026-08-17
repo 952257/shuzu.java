@@ -43,8 +43,7 @@ public class LoginService {
             throw new ServiceException(ServiceExceptionEnum.UNAUTHORIZED);
         }
 
-        String encoded = PasswordUtil.passwdMd5(dto.getPasswd());
-        if (!encoded.equalsIgnoreCase(user.getPassword())) {
+        if (!PasswordUtil.matches(dto.getPasswd(), user.getPassword())) {
             throw new ServiceException(ServiceExceptionEnum.UNAUTHORIZED);
         }
         if (!"ADMIN".equals(user.getRole()) && !"STAFF".equals(user.getRole())) {
@@ -52,6 +51,7 @@ public class LoginService {
         }
 
         StoreUser storeUser = storeUserMapper.selectOne(new LambdaQueryWrapper<StoreUser>().eq(StoreUser::getUserId, user.getUserId()));
+        String storeId = storeUser == null ? null : storeUser.getStoreId();
         if (storeUser != null) {
             Store store = storeMapper.selectById(storeUser.getStoreId());
             if (store != null && "48002".equals(store.getState())) {
@@ -59,7 +59,7 @@ public class LoginService {
             }
         }
 
-        String token = jwtUtil.createToken(user.getUserId(), user.getName(), user.getRole());
+        String token = jwtUtil.createToken(user.getUserId(), user.getName(), user.getRole(), storeId);
         UserLogin log = new UserLogin();
         log.setLoginId(IdGenerator.nextId());
         log.setUserId(user.getUserId());

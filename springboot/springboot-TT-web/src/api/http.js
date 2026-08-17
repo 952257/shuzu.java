@@ -23,15 +23,18 @@ http.interceptors.response.use(
     return data;
   },
   async (err) => {
-    if (err.response && err.response.status === 401) {
+    const status = err.response && err.response.status;
+    const msg = (err.response && err.response.data && err.response.data.msg) || "网络异常";
+    if (status === 401) {
       localStorage.removeItem("tt_token");
       localStorage.removeItem("tt_user");
       const { default: router } = await import("@/router");
+      ElMessage.error(msg);
       if (router.currentRoute.value.path !== "/login") {
         router.push("/login");
       }
     } else {
-      ElMessage.error((err.response && err.response.data && err.response.data.msg) || "网络异常");
+      ElMessage.error(msg);
     }
     return Promise.reject(err);
   }

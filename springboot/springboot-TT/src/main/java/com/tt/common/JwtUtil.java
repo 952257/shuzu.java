@@ -28,13 +28,14 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(padSecret(secret).getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createToken(String userId, String userName, String role) {
+    public String createToken(String userId, String userName, String role, String storeId) {
         Date now = new Date();
         Date expire = new Date(now.getTime() + expireHours * 60 * 60 * 1000);
         return Jwts.builder()
                 .setSubject(userId)
                 .claim("userName", userName)
                 .claim("role", role)
+                .claim("storeId", storeId)
                 .setIssuedAt(now)
                 .setExpiration(expire)
                 .signWith(key, SignatureAlgorithm.HS256)

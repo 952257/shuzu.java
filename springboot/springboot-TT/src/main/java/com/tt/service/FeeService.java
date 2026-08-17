@@ -1,16 +1,22 @@
 package com.tt.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tt.common.PhysicalDelete;
+import com.tt.common.PhysicalServiceImpl;
 import com.tt.common.IdGenerator;
 import com.tt.common.PageResult;
+import com.tt.common.CommunityGuard;
 import com.tt.common.QueryHelper;
 import com.tt.mapper.FeeConfigMapper;
+import com.tt.mapper.ParkingSpaceMapper;
 import com.tt.mapper.PayFeeDetailMapper;
 import com.tt.mapper.PayFeeMapper;
+import com.tt.mapper.RoomMapper;
 import com.tt.po.FeeConfig;
+import com.tt.po.ParkingSpace;
 import com.tt.po.PayFee;
 import com.tt.po.PayFeeDetail;
+import com.tt.po.Room;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -24,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
+public class FeeService extends PhysicalServiceImpl<PayFeeMapper, PayFee> {
 
     @Resource
     private FeeConfigMapper feeConfigMapper;
@@ -32,17 +38,24 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
     private PayFeeDetailMapper payFeeDetailMapper;
     @Resource
     private FeeConfigService feeConfigService;
+    @Resource
+    private RoomMapper roomMapper;
+    @Resource
+    private ParkingSpaceMapper parkingSpaceMapper;
+    @Resource
+    private PhysicalDelete physicalDelete;
 
     public PageResult<FeeConfig> listFeeConfigs(String communityId, String feeName, Integer page, Integer row) {
+        CommunityGuard.requireCommunity(communityId);
         LambdaQueryWrapper<FeeConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StringUtils.hasText(communityId), FeeConfig::getCommunityId, communityId)
+        wrapper.eq(FeeConfig::getCommunityId, communityId)
                 .like(StringUtils.hasText(feeName), FeeConfig::getFeeName, feeName)
                 .orderByDesc(FeeConfig::getCreateTime);
         return QueryHelper.toPage(feeConfigService, wrapper, page, row);
     }
 
     public String saveFeeConfig(FeeConfig config) {
-        QueryHelper.requireHasText(config.getCommunityId(), "小区ID不能为空");
+        CommunityGuard.requireCommunity(config.getCommunityId());
         QueryHelper.requireHasText(config.getFeeName(), "费用项名称不能为空");
         QueryHelper.requireHasText(config.getFeeTypeCd(), "费用类型不能为空");
         config.setConfigId(IdGenerator.nextId());
@@ -52,17 +65,23 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
 
     public void updateFeeConfig(FeeConfig config) {
         QueryHelper.requireHasText(config.getConfigId(), "费用项ID不能为空");
+        FeeConfig db = feeConfigMapper.selectById(config.getConfigId());
+        CommunityGuard.mustBelong(db, FeeConfig::getCommunityId, "费用项不存在");
+        config.setCommunityId(db.getCommunityId());
         feeConfigMapper.updateById(config);
     }
 
     public void deleteFeeConfig(String configId) {
         QueryHelper.requireHasText(configId, "费用项ID不能为空");
-        feeConfigMapper.deleteById(configId);
+        FeeConfig db = feeConfigMapper.selectById(configId);
+        CommunityGuard.mustBelong(db, FeeConfig::getCommunityId, "费用项不存在");
+        physicalDelete.byId(FeeConfig.class, configId);
     }
 
     public PageResult<PayFee> listFee(String communityId, String payerObjId, String state, Integer page, Integer row) {
+        CommunityGuard.requireCommunity(communityId);
         LambdaQueryWrapper<PayFee> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StringUtils.hasText(communityId), PayFee::getCommunityId, communityId)
+        wrapper.eq(PayFee::getCommunityId, communityId)
                 .eq(StringUtils.hasText(payerObjId), PayFee::getPayerObjId, payerObjId)
                 .eq(StringUtils.hasText(state), PayFee::getState, state)
                 .orderByDesc(PayFee::getCreateTime);
@@ -72,9 +91,12 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
     public String saveFee(PayFee fee) {
         QueryHelper.requireHasText(fee.getConfigId(), "费用项ID不能为空");
         QueryHelper.requireHasText(fee.getPayerObjId(), "缴费对象不能为空");
-        QueryHelper.requireHasText(fee.getCommunityId(), "小区ID不能为空");
+        CommunityGuard.requireCommunity(fee.getCommunityId());
         FeeConfig config = feeConfigMapper.selectById(fee.getConfigId());
         QueryHelper.require(config != null, "费用项不存在");
+        CommunityGuard.requireCommunity(config.getCommunityId());
+        QueryHelper.require(fee.getCommunityId().equals(config.getCommunityId()), "费用项不属于该小区");
+        requirePayerInCommunity(fee.getPayerObjId(), fee.getPayerObjType(), fee.getCommunityId());
         fee.setFeeId(IdGenerator.nextId());
         fee.setFeeName(config.getFeeName());
         if (!StringUtils.hasText(fee.getState())) {
@@ -88,7 +110,8 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
     public String payFee(PayFeeDetail detail) {
         QueryHelper.requireHasText(detail.getFeeId(), "费用ID不能为空");
         PayFee fee = getById(detail.getFeeId());
-        QueryHelper.require(fee != null, "费用不存在");
+        CommunityGuard.mustBelong(fee, PayFee::getCommunityId, "费用不存在");
+        QueryHelper.require("2008001".equals(fee.getState()), "该费用已结束收费，不能重复缴费");
         detail.setDetailId(IdGenerator.nextId());
         detail.setCommunityId(fee.getCommunityId());
         detail.setPayTime(new Date());
@@ -105,16 +128,21 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
             detail.setAuditState("1000");
         }
         payFeeDetailMapper.insert(detail);
+        fee.setState("2009001");
+        updateById(fee);
         return detail.getDetailId();
     }
 
     @Transactional
-    public int payFeesByPayer(String payerObjId) {
+    public int payFeesByPayer(String communityId, String payerObjId) {
         QueryHelper.requireHasText(payerObjId, "缴费对象不能为空");
+        CommunityGuard.requireCommunity(communityId);
         List<PayFee> fees = list(new LambdaQueryWrapper<PayFee>()
+                .eq(PayFee::getCommunityId, communityId)
                 .eq(PayFee::getPayerObjId, payerObjId)
                 .eq(PayFee::getState, "2008001"));
         for (PayFee fee : fees) {
+            CommunityGuard.mustBelong(fee, PayFee::getCommunityId, "费用不存在");
             PayFeeDetail detail = new PayFeeDetail();
             detail.setFeeId(fee.getFeeId());
             payFee(detail);
@@ -125,7 +153,7 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
     public void urgeFee(String feeId) {
         QueryHelper.requireHasText(feeId, "费用ID不能为空");
         PayFee fee = getById(feeId);
-        QueryHelper.require(fee != null, "费用不存在");
+        CommunityGuard.mustBelong(fee, PayFee::getCommunityId, "费用不存在");
         QueryHelper.require("2008001".equals(fee.getState()), "仅收费中的账单可催缴");
     }
 
@@ -134,6 +162,7 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
         QueryHelper.requireHasText(detailId, "缴费记录ID不能为空");
         PayFeeDetail detail = payFeeDetailMapper.selectById(detailId);
         QueryHelper.require(detail != null, "缴费记录不存在");
+        belongFeeDetail(detail);
         QueryHelper.require(!"1500".equals(detail.getState()), "该记录已退费");
         QueryHelper.require("1100".equals(detail.getAuditState()) || !StringUtils.hasText(detail.getAuditState()), "仅已审核通过的缴费可退费");
         detail.setState("1500");
@@ -141,6 +170,11 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
             detail.setRemark(remark);
         }
         payFeeDetailMapper.updateById(detail);
+        PayFee fee = getById(detail.getFeeId());
+        if (fee != null) {
+            fee.setState("2008001");
+            updateById(fee);
+        }
     }
 
     public void auditFee(String detailId, String auditState, String remark) {
@@ -148,15 +182,31 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
         QueryHelper.requireHasText(auditState, "审核结果不能为空");
         PayFeeDetail detail = payFeeDetailMapper.selectById(detailId);
         QueryHelper.require(detail != null, "缴费记录不存在");
+        belongFeeDetail(detail);
         QueryHelper.require("1000".equals(detail.getAuditState()) || !StringUtils.hasText(detail.getAuditState()), "该记录已审核");
         detail.setAuditState(auditState);
         if (StringUtils.hasText(remark)) {
             detail.setRemark(remark);
         }
         payFeeDetailMapper.updateById(detail);
+        if ("1200".equals(auditState) && StringUtils.hasText(detail.getFeeId())) {
+            PayFee fee = getById(detail.getFeeId());
+            if (fee != null) {
+                fee.setState("2008001");
+                updateById(fee);
+            }
+        }
     }
 
     public PageResult<PayFeeDetail> queryFeeDetail(String feeId, String communityId, String auditState, Integer page, Integer row) {
+        QueryHelper.require(StringUtils.hasText(feeId) || StringUtils.hasText(communityId), "费用ID或小区ID不能为空");
+        if (StringUtils.hasText(communityId)) {
+            CommunityGuard.requireCommunity(communityId);
+        } else {
+            PayFee fee = getById(feeId);
+            CommunityGuard.mustBelong(fee, PayFee::getCommunityId, "费用不存在");
+            communityId = fee.getCommunityId();
+        }
         LambdaQueryWrapper<PayFeeDetail> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(StringUtils.hasText(feeId), PayFeeDetail::getFeeId, feeId)
                 .eq(StringUtils.hasText(communityId), PayFeeDetail::getCommunityId, communityId)
@@ -170,8 +220,9 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
     }
 
     public Map<String, Object> feeSummary(String communityId) {
+        CommunityGuard.requireCommunity(communityId);
         LambdaQueryWrapper<PayFee> feeWrapper = new LambdaQueryWrapper<>();
-        feeWrapper.eq(StringUtils.hasText(communityId), PayFee::getCommunityId, communityId);
+        feeWrapper.eq(PayFee::getCommunityId, communityId);
         List<PayFee> fees = list(feeWrapper);
         BigDecimal receivable = BigDecimal.ZERO;
         BigDecimal arrears = BigDecimal.ZERO;
@@ -201,7 +252,7 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
             }
         }
         LambdaQueryWrapper<PayFeeDetail> detailWrapper = new LambdaQueryWrapper<>();
-        detailWrapper.eq(StringUtils.hasText(communityId), PayFeeDetail::getCommunityId, communityId)
+        detailWrapper.eq(PayFeeDetail::getCommunityId, communityId)
                 .eq(PayFeeDetail::getState, "1400")
                 .and(w -> w.ne(PayFeeDetail::getAuditState, "1200").or().isNull(PayFeeDetail::getAuditState));
         List<PayFeeDetail> details = payFeeDetailMapper.selectList(detailWrapper);
@@ -221,9 +272,29 @@ public class FeeService extends ServiceImpl<PayFeeMapper, PayFee> {
     public void deleteFee(String feeId) {
         QueryHelper.requireHasText(feeId, "费用ID不能为空");
         PayFee fee = getById(feeId);
-        QueryHelper.require(fee != null, "费用不存在");
-        fee.setState("2009001");
-        updateById(fee);
+        CommunityGuard.mustBelong(fee, PayFee::getCommunityId, "费用不存在");
+        removeById(feeId);
+    }
+
+    private void belongFeeDetail(PayFeeDetail detail) {
+        if (StringUtils.hasText(detail.getCommunityId())) {
+            CommunityGuard.requireCommunity(detail.getCommunityId());
+            return;
+        }
+        PayFee fee = getById(detail.getFeeId());
+        CommunityGuard.mustBelong(fee, PayFee::getCommunityId, "费用不存在");
+    }
+
+    private void requirePayerInCommunity(String payerObjId, String payerObjType, String communityId) {
+        if ("6666".equals(payerObjType)) {
+            ParkingSpace space = parkingSpaceMapper.selectById(payerObjId);
+            CommunityGuard.mustBelong(space, ParkingSpace::getCommunityId, "车位不存在");
+            QueryHelper.require(communityId.equals(space.getCommunityId()), "缴费对象不属于该小区");
+            return;
+        }
+        Room room = roomMapper.selectById(payerObjId);
+        CommunityGuard.mustBelong(room, Room::getCommunityId, "房屋不存在");
+        QueryHelper.require(communityId.equals(room.getCommunityId()), "缴费对象不属于该小区");
     }
 
 }

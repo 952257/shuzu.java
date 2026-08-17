@@ -6,9 +6,9 @@ spring:
     time-zone: Asia/Shanghai
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/TT?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-    username: root
-    password: hjx127307
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:TT}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:hjx127307}
 
 mybatis-plus:
   configuration:
@@ -19,5 +19,5 @@ mybatis-plus:
 
 tt:
   jwt:
-    secret: tt-homecommunity-secret-key-2026
+    secret: ${TT_JWT_SECRET:tt-homecommunity-secret-key-2026}
     expire-hours: 2
