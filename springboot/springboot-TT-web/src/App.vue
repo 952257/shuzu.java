@@ -10,12 +10,10 @@
     </div>
     <div class="env-light" aria-hidden="true"></div>
     <svg class="lg-svg" aria-hidden="true">
-      <filter id="lg-edge" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-        <feMorphology in="SourceAlpha" operator="erode" radius="7" result="inner" />
-        <feComposite in="SourceAlpha" in2="inner" operator="out" result="rim" />
-        <feGaussianBlur in="rim" stdDeviation="3.2" result="softRim" />
-        <feColorMatrix in="softRim" type="matrix" values="0 0 0 0.5 0.5  0 0 0 0.28 0.5  0 0 0 0 0.5  0 0 0 0 1" result="map" />
-        <feDisplacementMap in="SourceGraphic" in2="map" scale="18" xChannelSelector="R" yChannelSelector="G" />
+      <filter id="lg-liquid" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.009 0.016" numOctaves="2" seed="4" result="n" />
+        <feGaussianBlur in="n" stdDeviation="0.55" result="s" />
+        <feDisplacementMap in="SourceGraphic" in2="s" scale="28" xChannelSelector="R" yChannelSelector="G" />
       </filter>
     </svg>
     <router-view />

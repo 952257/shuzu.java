@@ -22,29 +22,132 @@
 
 ## 目录结构
 
-```
-springboot-TT/                         后端
-├── apifox/                            Apifox / Postman 用例
-│   ├── TT-物业接口.postman_collection.json
-│   ├── TT-物业环境.postman_environment.json
-│   └── generate_collection.py
-├── src/main/java/com/tt/
-│   ├── TtApplication.java
-│   ├── common/                        统一返回、异常、JWT、分页
-│   ├── config/                        MyBatis-Plus、拦截器、CORS
-│   ├── controller/                    /app/{service.action}
-│   ├── interceptor/AuthInterceptor.java
-│   ├── mapper/  po/  service/  dto/
-└── src/main/resources/
-    ├── application.yml                激活 dev
-    ├── application-dev.yml            端口、数据源、JWT
-    └── db/schema.sql                  建表 + 演示数据（含 DROP，慎用）
+仓库根目录是 `javafirst`，本项目在 `springboot/` 下分后端和前端两份代码。
 
-springboot-TT-web/                     前端
-├── src/api/http.js                    Axios，自动带 token
-├── src/layout/                        壳子、菜单
-├── src/views/                         业务页面
-└── vite.config.js                     代理 /app → 8088
+```
+springboot/
+├── springboot-TT/                     后端（Spring Boot 2.6.2，端口 8088）
+└── springboot-TT-web/                 前端（Vue 3 + Vite，端口 5173）
+```
+
+### 后端 `springboot-TT/`
+
+```
+springboot-TT/
+├── pom.xml
+├── README.md
+├── apifox/                                          接口用例（导入 Apifox）
+│   ├── TT-物业接口.postman_collection.json
+│   ├── TT-物业环境.postman_environment.json         环境变量 ttBaseUrl=8088
+│   └── generate_collection.py                       改用例后重新生成集合
+└── src/main/
+    ├── java/com/tt/
+    │   ├── TtApplication.java                       启动类
+    │   ├── common/                                  横切能力
+    │   │   ├── Result.java                          统一返回 {code,msg,data}
+    │   │   ├── PageResult.java                      分页 total / page / rows
+    │   │   ├── JwtUtil.java                         签发与校验 Bearer token
+    │   │   ├── PasswordUtil.java                    md5(md5(passwd + hc@java110))
+    │   │   ├── IdGenerator.java                     主键生成
+    │   │   ├── QueryHelper.java                     列表查询条件
+    │   │   ├── UserContext.java                     当前登录用户
+    │   │   ├── ServiceException.java
+    │   │   ├── ServiceExceptionEnum.java
+    │   │   └── GlobalExceptionHandler.java
+    │   ├── config/
+    │   │   ├── MybatisPlusConfig.java               分页插件、逻辑删除
+    │   │   └── WebMvcConfig.java                    拦截器、CORS
+    │   ├── interceptor/
+    │   │   └── AuthInterceptor.java                 除登录外校验 Authorization
+    │   ├── dto/
+    │   │   ├── LoginDto.java                        登录入参（passwd）
+    │   │   └── LoginVo.java                         登录出参（token + 用户）
+    │   ├── po/                                      实体，对应 MySQL 表
+    │   ├── mapper/                                  MyBatis-Plus Mapper
+    │   ├── service/                                 业务
+    │   │   ├── LoginService.java
+    │   │   ├── CommunityService.java / PropertyService.java / FloorService.java
+    │   │   ├── UnitService.java / RoomService.java
+    │   │   ├── OwnerService.java / OwnerAppUserService.java / AccountService.java
+    │   │   ├── ParkingSpaceService.java / OwnerCarService.java
+    │   │   ├── FeeConfigService.java / FeeService.java / MeterWaterService.java
+    │   │   ├── RepairService.java / ComplaintService.java
+    │   │   ├── StaffService.java
+    │   │   ├── BizDeskService.java                  业务受理（按 1-1-101 查房）
+    │   │   └── OpsService.java                      组织/公告/投票/访客/巡检/采购/合同/折扣
+    │   └── controller/                              路径 /app/{服务名.动作}
+    │       ├── LoginController.java                 login.pcUserLogin
+    │       ├── CommunityController.java             community.*
+    │       ├── PropertyController.java              property.*
+    │       ├── FloorController.java                 floor.*
+    │       ├── UnitController.java                  unit.*
+    │       ├── RoomController.java                  room.*（含交房/退房）
+    │       ├── OwnerController.java                 owner.*
+    │       ├── OwnerAppUserController.java          房屋认证
+    │       ├── AccountController.java               account.*
+    │       ├── ParkingSpaceController.java          parkingSpace.*
+    │       ├── OwnerCarController.java              ownerCar.*
+    │       ├── FeeController.java                   feeConfig.* / fee.*
+    │       ├── MeterWaterController.java            meterWater.*
+    │       ├── RepairController.java                repair.*
+    │       ├── ComplaintController.java             complaint.*
+    │       ├── StaffController.java                 staff.*
+    │       ├── DashboardController.java             工作台统计
+    │       ├── BizDeskController.java               业务受理
+    │       └── OpsController.java                   办公/巡检/采购等
+    └── resources/
+        ├── application.yml                          激活 dev
+        ├── application-dev.yml                      端口 8088、数据源、JWT
+        └── db/
+            ├── schema.sql                           建表 + 基础演示数据（含 DROP，慎用）
+            ├── seed_demo.sql                        扩充演示数据（INSERT IGNORE）
+            ├── migrate_ops.sql                      已有库补组织/公告等表
+            └── migrate_settings.sql                 已有库补小区配置表
+```
+
+`po/`、`mapper/` 与表一一对应，主要表：`u_user`、`s_store`、`community`、`f_floor`、`building_unit`、`building_room`、`building_owner`、`parking_space`、`owner_car`、`pay_fee_config`、`pay_fee`、`pay_fee_detail`、`meter_water`、`r_repair_pool`、`complaint`、`account`，以及 `tt_*` 扩展表（组织、公告、投票、访客、巡检、采购、合同、折扣、配置）。
+
+### 前端 `springboot-TT-web/`
+
+```
+springboot-TT-web/
+├── package.json
+├── vite.config.js                                   /app 代理到 8088
+├── index.html
+└── src/
+    ├── main.js                                      挂载 Vue、Element Plus、路由
+    ├── App.vue                                      液态玻璃背景壳
+    ├── style.css                                    全局样式、玻璃材质
+    ├── api/
+    │   └── http.js                                  Axios，自动带 Bearer token
+    ├── utils/
+    │   ├── community.js                             当前小区 communityId
+    │   └── dict.js                                  状态下拉字典
+    ├── router/
+    │   └── index.js                                 路由表；无 token 跳登录
+    ├── layout/
+    │   ├── MainLayout.vue                           顶栏、图标栏、子菜单、页签
+    │   └── menus.js                                 左侧菜单（小区/房产/费用/停车/报修…）
+    ├── components/
+    │   └── CrudPage.vue                             通用增删改查页（POST/PUT/DELETE）
+    └── views/
+        ├── Login.vue                                登录
+        ├── Home.vue                                 工作台
+        ├── BusinessDesk.vue                         业务受理
+        ├── Screen.vue                               小区大屏
+        ├── Settings.vue                             小区配置
+        ├── Password.vue                             修改密码
+        ├── Logs.vue                                 操作日志
+        ├── Community.vue / Property.vue / Org.vue / Staff.vue
+        ├── Floor.vue / Unit.vue / Room.vue / Shop.vue
+        ├── Owner.vue / Member.vue / Auth.vue / Account.vue
+        ├── Parking.vue / Car.vue / Visit.vue
+        ├── FeeConfig.vue / Fee.vue / Arrears.vue
+        ├── FeeDetail.vue / FeeAudit.vue / Receipt.vue
+        ├── Meter.vue / Discount.vue / FeeReport.vue
+        ├── Repair.vue / Complaint.vue / Inspection.vue
+        ├── Purchase.vue / Contract.vue / WorkReport.vue
+        └── Notice.vue / Vote.vue
 ```
 
 ---

@@ -13,11 +13,18 @@
         <button @click="searchOpen = true">搜索</button>
       </nav>
       <div class="header-right">
-        <el-select v-model="communityId" placeholder="切换小区" style="width: 160px" @change="switchCommunity">
+        <el-select
+          class="community-switch"
+          popper-class="community-switch-popper glass"
+          v-model="communityId"
+          placeholder="切换小区"
+          style="width: 160px"
+          @change="switchCommunity"
+        >
           <el-option v-for="c in communities" :key="c.communityId" :label="c.name" :value="c.communityId" />
         </el-select>
         <span class="now">{{ now }}</span>
-        <el-dropdown :show-arrow="false">
+        <el-dropdown :show-arrow="false" popper-class="glass">
           <span class="user-chip">
             <el-avatar :size="26">{{ (userName || "U").slice(0, 1) }}</el-avatar>
             {{ userName }} / {{ role === "ADMIN" ? "admin" : "staff" }}
@@ -72,7 +79,7 @@
           </div>
           <button v-if="tabs.length" class="tab-close-all" @click="closeAll">关闭所有</button>
         </div>
-        <div class="content">
+        <div class="content glass">
           <router-view :key="communityId + $route.fullPath" />
         </div>
       </section>
