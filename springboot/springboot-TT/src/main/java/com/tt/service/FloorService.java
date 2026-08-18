@@ -17,10 +17,14 @@ public class FloorService extends PhysicalServiceImpl<FloorMapper, Floor> {
     public PageResult<Floor> queryFloors(String communityId, String floorNum, String name, Integer page, Integer row) {
         CommunityGuard.requireCommunity(communityId);
         LambdaQueryWrapper<Floor> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Floor::getCommunityId, communityId)
-                .eq(StringUtils.hasText(floorNum), Floor::getFloorNum, floorNum)
-                .like(StringUtils.hasText(name), Floor::getName, name)
-                .orderByAsc(Floor::getSeq);
+        wrapper.eq(Floor::getCommunityId, communityId);
+        if (StringUtils.hasText(floorNum)) {
+            wrapper.and(w -> w.like(Floor::getFloorNum, floorNum).or().eq(Floor::getFloorId, floorNum));
+        }
+        if (StringUtils.hasText(name)) {
+            wrapper.and(w -> w.like(Floor::getName, name).or().like(Floor::getFloorNum, name));
+        }
+        wrapper.orderByAsc(Floor::getSeq).orderByAsc(Floor::getFloorNum);
         return QueryHelper.toPage(this, wrapper, page, row);
     }
 

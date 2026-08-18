@@ -8,7 +8,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="helloworld-spring-boot-starter (1)" />
-        <module name="springboot-TT" />
         <module name="m2" />
         <module name="m1 (1)" />
         <module name="springboot-sakila" />
@@ -25,6 +24,15 @@
         <module name="springboot-mybatis" />
         <module name="Atm" />
         <module name="springboot-mybatisplus (1)" />
+      </profile>
+      <profile name="Annotation profile for springboot" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/maven/apache-maven-3.9.16/repository/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+        </processorPath>
+        <module name="springboot-TT" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -45,7 +53,7 @@
       <module name="helloworld-spring-boot-starter" options="" />
       <module name="helloworld-spring-boot-starter (1)" options="-parameters" />
       <module name="springboot" options="" />
-      <module name="springboot-TT" options="-parameters" />
+      <module name="springboot-TT" options="-parameters -parameters" />
       <module name="springboot-demo" options="-parameters" />
       <module name="springboot-mybatis" options="-parameters" />
       <module name="springboot-mybatisplus" options="-parameters" />

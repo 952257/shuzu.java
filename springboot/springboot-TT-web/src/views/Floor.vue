@@ -10,7 +10,7 @@
     add-text="添加楼栋"
     edit-text="编辑楼栋"
     :default-query="{ communityId: cid }"
-    :query-fields="[{ prop: 'communityId', label: '小区ID' }, { prop: 'name', label: '楼栋名称' }]"
+    :query-fields="[{ prop: 'floorNum', label: '楼栋编号' }, { prop: 'name', label: '楼栋名称' }]"
     :columns="[
       { prop: 'floorId', label: '楼栋ID', width: 160 },
       { prop: 'floorNum', label: '编号' },
