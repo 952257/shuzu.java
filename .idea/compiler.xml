@@ -8,7 +8,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="helloworld-spring-boot-starter (1)" />
-        <module name="springboot-redis (1)" />
         <module name="m2" />
         <module name="m1 (1)" />
         <module name="springboot-sakila" />
@@ -47,6 +46,7 @@
       <module name="springboot (1)" target="1.5" />
       <module name="springboot-mybatisplus" target="17" />
       <module name="springboot-others" target="17" />
+      <module name="springboot-redis (1)" target="1.8" />
       <module name="springboot-sakila-mybatisplus (1)" target="1.8" />
     </bytecodeTargetLevel>
   </component>
