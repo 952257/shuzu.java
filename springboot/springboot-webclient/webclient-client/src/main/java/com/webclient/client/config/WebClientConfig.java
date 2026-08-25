@@ -40,7 +40,7 @@ public class WebClientConfig {
                 // 连接超时：建立TCP连接的超时时间
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                 // 读取超时：从服务器读取响应的超时时间
-                .responseTimeout(Duration.ofSeconds(3));
+                .responseTimeout(Duration.ofSeconds(10));
     }
     @Bean
     public WebClient userWebClient(HttpClient httpClient) {

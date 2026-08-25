@@ -16,14 +16,12 @@
         <module name="m4" />
         <module name="m5" />
         <module name="m6" />
-        <module name="webclient-mock (1)" />
         <module name="demo" />
         <module name="springboot-demo" />
         <module name="springboot-redis" />
         <module name="webclient-mock" />
         <module name="springboot-sakila-mybatisplus" />
         <module name="springboot-web" />
-        <module name="webclient-client (1)" />
         <module name="springboot-others (1)" />
         <module name="springboot-mybatis" />
         <module name="Atm" />
@@ -53,6 +51,8 @@
       <module name="springboot-others" target="17" />
       <module name="springboot-redis (1)" target="1.8" />
       <module name="springboot-sakila-mybatisplus (1)" target="1.8" />
+      <module name="webclient-client (1)" target="1.8" />
+      <module name="webclient-mock (1)" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
