@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/javafirst.iml" filepath="$PROJECT_DIR$/javafirst.iml" />
+      <module fileurl="file://$PROJECT_DIR$/webclient-client.iml" filepath="$PROJECT_DIR$/webclient-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/webclient-mock.iml" filepath="$PROJECT_DIR$/webclient-mock.iml" />
     </modules>
   </component>
 </project>

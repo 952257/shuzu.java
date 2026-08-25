@@ -33,6 +33,7 @@
     <file url="file://$PROJECT_DIR$/springboot/springboot-TT/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springboot-demo/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springboot-demo/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springboot-docker/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springboot-mybatis/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springboot-mybatis/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springboot-mybatisplus/src/main/java" charset="UTF-8" />
@@ -45,6 +46,12 @@
     <file url="file://$PROJECT_DIR$/springboot/springboot-sakila/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springboot-web/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springboot-web/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springboot-webclient/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springboot-webclient/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springboot-webclient/webclient-client/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springboot-webclient/webclient-client/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springboot-webclient/webclient-mock/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springboot-webclient/webclient-mock/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/src/main/resources" charset="UTF-8" />
   </component>

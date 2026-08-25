@@ -20,6 +20,8 @@
         <module>springboot-sakila-mybatisplus</module>
         <module>springboot-TT</module>
         <module>springboot-redis</module>
+        <module>springboot-docker</module>
+        <module>springboot-webclient</module>
     </modules>
 
     <properties>

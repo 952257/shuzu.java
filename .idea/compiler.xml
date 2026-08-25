@@ -16,15 +16,20 @@
         <module name="m4" />
         <module name="m5" />
         <module name="m6" />
+        <module name="webclient-mock (1)" />
         <module name="demo" />
         <module name="springboot-demo" />
         <module name="springboot-redis" />
+        <module name="webclient-mock" />
         <module name="springboot-sakila-mybatisplus" />
         <module name="springboot-web" />
+        <module name="webclient-client (1)" />
         <module name="springboot-others (1)" />
         <module name="springboot-mybatis" />
         <module name="Atm" />
         <module name="springboot-mybatisplus (1)" />
+        <module name="webclient-client" />
+        <module name="springboot-docker" />
       </profile>
       <profile name="Annotation profile for springboot" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -57,6 +62,7 @@
       <module name="springboot" options="" />
       <module name="springboot-TT" options="-parameters -parameters" />
       <module name="springboot-demo" options="-parameters" />
+      <module name="springboot-docker" options="-parameters" />
       <module name="springboot-mybatis" options="-parameters" />
       <module name="springboot-mybatisplus" options="-parameters" />
       <module name="springboot-mybatisplus (1)" options="-parameters" />
@@ -66,6 +72,8 @@
       <module name="springboot-sakila" options="-parameters" />
       <module name="springboot-sakila-mybatisplus" options="-parameters" />
       <module name="springboot-web" options="-parameters" />
+      <module name="webclient-client" options="-parameters" />
+      <module name="webclient-mock" options="-parameters" />
     </option>
   </component>
 </project>
