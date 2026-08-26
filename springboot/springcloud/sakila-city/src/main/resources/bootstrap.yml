@@ -1,0 +1,32 @@
+server:
+  port: 8002
+spring:
+  application:
+    name: sakila-city
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.150.130:8848
+        namespace: sakila-dev
+        shared-configs[0]:
+          data-id: application.yml
+          group: CITY_GROUP
+          refresh: true
+        extension-configs[0]:
+          data-id: mysql.yaml
+          group: DEV_GROUP
+          refresh: true
+      discovery:
+        server-addr: 192.168.150.130:8848
+
+logging:
+  level:
+    com.springcloud.sakila.city.feign: debug
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full

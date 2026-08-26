@@ -64,6 +64,10 @@
     <file url="file://$PROJECT_DIR$/springboot/springcloud/provider-payment/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springcloud/rocketmq/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springcloud/rocketmq/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springcloud/sakila-city/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springcloud/sakila-city/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springcloud/sakila-country/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/springboot/springcloud/sakila-country/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springcloud/seata/account-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springcloud/seata/account-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/springboot/springcloud/seata/order-service/src/main/java" charset="UTF-8" />

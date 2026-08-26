@@ -16,6 +16,8 @@
         <module>sentinel</module>
         <module>seata</module>
         <module>rocketmq</module>
+        <module>sakila-country</module>
+        <module>sakila-city</module>
     </modules>
 
     <properties>

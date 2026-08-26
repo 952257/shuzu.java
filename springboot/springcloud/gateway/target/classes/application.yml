@@ -1,12 +1,12 @@
 server:
-  port: 7000
+  port: 7001
 spring:
   application:
     name: api-gateway
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.232.100:8848
+        server-addr: 192.168.150.130:8848
     gateway:
       routes:                       # 路由数组[路由 就是指定当请求满足什么条件的时候转到哪个微服务]
         - id: consumer_route          # 当前路由的标识, 要求唯一
@@ -20,4 +20,16 @@ spring:
           predicates:                # 断言(就是路由转发要满足的条件)
             - Path=/emall/payment/**       # 当请求路径满足Path指定的规则时,才进行路由转发
           filters:                   # 过滤器,请求在传递过程中可以通过过滤器对其进行一定的修改
+            - StripPrefix=1
+        - id: sakila_city_route
+          uri: lb://sakila-city
+          predicates:
+            - Path=/emall/city/**
+          filters:
+            - StripPrefix=1
+        - id: sakila_country_route
+          uri: lb://sakila-country
+          predicates:
+            - Path=/emall/country/**
+          filters:
             - StripPrefix=1

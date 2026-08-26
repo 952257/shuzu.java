@@ -6,4 +6,16 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.232.100:8848
+        server-addr: 192.168.150.130:8848
+
+logging:
+  level:
+    com.springcloud.openfeign: debug
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full
