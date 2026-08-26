@@ -10,6 +10,7 @@
         <option value="$PROJECT_DIR$/maven/pom.xml" />
         <option value="$PROJECT_DIR$/springboot/pom.xml" />
         <option value="$PROJECT_DIR$/springboot/springboot-docker/pom.xml" />
+        <option value="$PROJECT_DIR$/springboot/springcloud/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

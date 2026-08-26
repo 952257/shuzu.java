@@ -1,0 +1,32 @@
+server:
+  port: 3377
+spring:
+  application:
+    name: nacos-config-client
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.150.130:8848
+        namespace: eshop-lab
+        # 多个配置文件的话可以是0 1 2这样依次配置,其中值越大，优先级越高，在yml中即靠后优先级高
+        #共享配置
+        shared-configs[0]:
+          data-id: mysql.yaml
+          group: DEFAULT_GROUP
+          refresh: true
+        shared-configs[1]:
+          data-id: redis.yaml
+          group: DEV_GROUP
+          refresh: true
+#        #扩展配置
+        extension-configs[0]:
+          # 刚才在nacos配置管理中定义的data-id
+          data-id: mysql.yaml
+          group: DEV_GROUP
+          refresh: true
+        extension-configs[1]:
+          data-id: mysql.yaml
+          group: TEST_GROUP
+          refresh: true
+      discovery:
+        server-addr: 192.168.150.130:8848

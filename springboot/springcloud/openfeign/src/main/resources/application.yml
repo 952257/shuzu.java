@@ -1,0 +1,9 @@
+server:
+  port: 8060
+spring:
+  application:
+    name: openfeign
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.150.130:8848

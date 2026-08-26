@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: rocketmq-provider
+
+rocketmq:
+  #RocketMQ 服务器地址
+  name-server: 192.168.232.100:9876
+  producer:
+    #生产者必须要有group，要不然启动不了
+    group: producer-group
+    #超时时间设置长一点，要不然会报错sendDefaultImpl call timeout
+    send-message-timeout: 50000
+server:
+  port: 9093
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
