@@ -20,7 +20,7 @@ public class AccountClient {
         Mono<String> userDtoMono = accountWebClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/account/decrease")
-                        .queryParam("userId", 1)
+                        .queryParam("userId", userId)
                         .queryParam("amount", amount)
                         .build())
                 //使用WebClient必须手动传递全局事务ID

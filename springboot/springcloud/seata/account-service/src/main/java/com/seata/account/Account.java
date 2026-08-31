@@ -13,6 +13,6 @@ public class Account {
     private Long id;
     private String accountId;
     private Integer userId;
-    private BigDecimal amount;
+    private BigDecimal balance;
     private String status;
 }

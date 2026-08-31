@@ -18,7 +18,7 @@ public class OrderServiceImpl implements OrderService {
     private AccountClient accountClient;
 
     @GlobalTransactional // ← 关键注解：开启全局事务
-    public void createOrder(Integer userId, BigDecimal amount) {
+    public void createOrder(Integer userId, BigDecimal amount, boolean rollback) {
         log.info("开始创建订单，全局事务 ID: {}", RootContext.getXID());
         String xid = RootContext.getXID();
         System.out.println("第1个子事务XID：" + xid); // 必须非空，
@@ -37,8 +37,9 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("扣减余额失败");
         }
 
-        // 模拟异常（用于测试回滚）
-//         int i = 1 / 0;
+        if (rollback) {
+            throw new RuntimeException("模拟异常，测试全局回滚");
+        }
 
         log.info("订单创建完成");
     }

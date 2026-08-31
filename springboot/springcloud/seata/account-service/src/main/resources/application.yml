@@ -1,28 +1,22 @@
 server:
-  port: 7071
+  port: 8001
 
 spring:
   application:
-    name: order-service  # 或 account-service
+    name: account-service
   datasource:
-    url: jdbc:mysql://192.168.232.200:3306/seata_account?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.150.130:3306/seata_account?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: qWe@#$123
+    password: hjx127307
     driver-class-name: com.mysql.cj.jdbc.Driver
   cloud:
     nacos:
       discovery:
         server-addr: 192.168.150.130:8848
 
-# Seata 配置
 seata:
   enabled: true
-  # 事务组名称（必须与 server 中 tx-service-group 一致）
   tx-service-group: my_test_tx_group
-  # Seata Server 地址（若用注册中心可不配）
-  #  service:
-  #    vgroup-mapping:
-  #      my_test_tx_group: default
   config:
     type: nacos
     nacos:
@@ -30,7 +24,6 @@ seata:
       namespace:
       group: SEATA_GROUP
       data-id: seataServer.properties
-
   registry:
     type: nacos
     nacos:
@@ -47,4 +40,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: '*'#开放所有端点
+        include: '*'

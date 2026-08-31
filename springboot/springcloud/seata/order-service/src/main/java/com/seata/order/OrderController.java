@@ -16,9 +16,11 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping("/order/create")
-    public String create(@RequestParam Integer userId, @RequestParam BigDecimal amount) {
+    public String create(@RequestParam Integer userId,
+                         @RequestParam BigDecimal amount,
+                         @RequestParam(defaultValue = "false") boolean rollback) {
         try {
-            orderService.createOrder(userId, amount);
+            orderService.createOrder(userId, amount, rollback);
             return "订单创建成功";
         } catch (Exception e) {
             log.error("订单创建失败", e);

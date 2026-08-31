@@ -16,8 +16,6 @@ public class AccountServiceImpl implements AccountService {
     public void decreaseBalance(Integer userId, BigDecimal amount) {
         String xid = RootContext.getXID();
         System.out.println("第二个子事务XID：" + xid); // 必须非空，
-        accountMapper.decreaseBalance(userId,amount);
-        System.out.println(1/0);
-
+        accountMapper.decreaseBalance(userId, amount);
     }
 }

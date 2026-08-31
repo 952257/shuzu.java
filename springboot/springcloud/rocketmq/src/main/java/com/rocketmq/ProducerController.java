@@ -35,6 +35,21 @@ public class ProducerController {
         return "success";
     }
 
+    @RequestMapping("/sendOneWayMsg")
+    public String sendOneWayMsg() {
+        this.rocketMQTemplate.sendOneWay("myTest", "单向消息");
+        return "success";
+    }
+
+    @RequestMapping("/sendOrderedMsg")
+    public String sendOrderedMsg() {
+        rocketMQTemplate.syncSendOrderly("orderTopic", "no1", "order");
+        rocketMQTemplate.syncSendOrderly("orderTopic", "no2", "order");
+        rocketMQTemplate.syncSendOrderly("orderTopic", "no3", "order");
+        rocketMQTemplate.syncSendOrderly("orderTopic", "no4", "order");
+        return "success";
+    }
+
     @RequestMapping("/sendSyncMsg")
     public String sendSyncMsg() {
         OrderEntity orderEntity = new OrderEntity(123456, "同步发送消息");

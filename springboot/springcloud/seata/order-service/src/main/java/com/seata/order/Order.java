@@ -1,5 +1,6 @@
 package com.seata.order;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -11,7 +12,7 @@ import java.math.BigDecimal;
 @Accessors(chain = true)
 @TableName("`order`")
 public class Order {
-    @TableId
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     private String orderId;
     private Integer userId;

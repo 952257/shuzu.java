@@ -36,6 +36,7 @@
         <module name="springboot-mybatis" />
         <module name="Atm" />
         <module name="order-service" />
+        <module name="satoken-demo" />
         <module name="springboot-docker" />
         <module name="config" />
         <module name="gateway" />
@@ -70,6 +71,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="helloworld-spring-boot-starter" options="" />
       <module name="helloworld-spring-boot-starter (1)" options="-parameters" />
+      <module name="satoken-demo" options="-parameters" />
       <module name="springboot" options="" />
       <module name="springboot-TT" options="-parameters -parameters" />
       <module name="springboot-demo" options="-parameters" />

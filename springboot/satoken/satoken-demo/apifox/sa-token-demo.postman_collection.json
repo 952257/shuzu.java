@@ -1,0 +1,621 @@
+{
+  "info": {
+    "name": "Sa-Token 初级教程（到角色校验）",
+    "description": "对应 satoken-demo 项目，端口 8081。\n\n使用说明：\n1. 先执行「01-登录认证」中的登录接口，Apifox 会自动保存 satoken Cookie\n2. 再执行权限/角色相关接口\n3. 修改环境变量 baseUrl 可切换服务地址",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "username",
+      "value": "zhang"
+    },
+    {
+      "key": "password",
+      "value": "123456"
+    }
+  ],
+  "item": [
+    {
+      "name": "01-登录认证",
+      "item": [
+        {
+          "name": "UserController-登录成功",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/doLogin?username={{username}}&password={{password}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "doLogin"],
+              "query": [
+                {"key": "username", "value": "{{username}}"},
+                {"key": "password", "value": "{{password}}"}
+              ]
+            },
+            "description": "浏览器示例：http://localhost:8081/user/doLogin?username=zhang&password=123456"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('登录成功', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.text()).to.include('登录成功');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UserController-登录失败",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/doLogin?username={{username}}&password=wrong",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "doLogin"],
+              "query": [
+                {"key": "username", "value": "{{username}}"},
+                {"key": "password", "value": "wrong"}
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('登录失败', function () {",
+                  "    pm.expect(pm.response.text()).to.include('登录失败');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UserController-查询登录状态",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/isLogin",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "isLogin"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LoginController-登录",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/acc/doLogin?name={{username}}&pwd={{password}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["acc", "doLogin"],
+              "query": [
+                {"key": "name", "value": "{{username}}"},
+                {"key": "pwd", "value": "{{password}}"}
+              ]
+            },
+            "description": "教程示例：http://localhost:8081/acc/doLogin?name=zhang&pwd=123456"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('登录成功', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LoginController-查询登录状态",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/acc/isLogin",
+              "host": ["{{baseUrl}}"],
+              "path": ["acc", "isLogin"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LoginController-查询Token信息",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/acc/tokenInfo",
+              "host": ["{{baseUrl}}"],
+              "path": ["acc", "tokenInfo"]
+            },
+            "description": "需先登录，返回 tokenName、tokenValue、loginId 等"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('已登录', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data.isLogin).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LoginController-注销",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/acc/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["acc", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02-权限校验",
+      "item": [
+        {
+          "name": "获取当前账号权限集合",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/getPermissionList",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "getPermissionList"]
+            },
+            "description": "模拟权限：101, user.add, user.update, user.get, art.*"
+          },
+          "response": []
+        },
+        {
+          "name": "判断是否有权限-user.add",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/hasPermission?permission=user.add",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "hasPermission"],
+              "query": [
+                {"key": "permission", "value": "user.add", "description": "应有权限"}
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('有 user.add 权限', function () {",
+                  "    pm.expect(pm.response.json().data).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "判断是否有权限-user.delete",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/hasPermission?permission=user.delete",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "hasPermission"],
+              "query": [
+                {"key": "permission", "value": "user.delete", "description": "应无权限"}
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('无 user.delete 权限', function () {",
+                  "    pm.expect(pm.response.json().data).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "校验权限-user.add（通过）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkPermission?permission=user.add",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkPermission"],
+              "query": [
+                {"key": "permission", "value": "user.add"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "校验权限-user.delete（失败）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkPermission?permission=user.delete",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkPermission"],
+              "query": [
+                {"key": "permission", "value": "user.delete"}
+              ]
+            },
+            "description": "未配置全局异常拦截时，返回 500"
+          },
+          "response": []
+        },
+        {
+          "name": "校验权限-AND（失败）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkPermissionAnd",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkPermissionAnd"]
+            },
+            "description": "需要 user.add + user.delete + user.get 全部通过，当前无 user.delete"
+          },
+          "response": []
+        },
+        {
+          "name": "校验权限-OR（通过）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkPermissionOr",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkPermissionOr"]
+            },
+            "description": "user.add / user.delete / user.get 任一通过即可"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OR 校验通过', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "通配符权限-art.add",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/hasPermission?permission=art.add",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "hasPermission"],
+              "query": [
+                {"key": "permission", "value": "art.add", "description": "art.* 通配符匹配"}
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('art.* 通配符生效', function () {",
+                  "    pm.expect(pm.response.json().data).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03-角色校验",
+      "item": [
+        {
+          "name": "获取当前账号角色集合",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/getRoleList",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "getRoleList"]
+            },
+            "description": "模拟角色：admin, super-admin"
+          },
+          "response": []
+        },
+        {
+          "name": "判断是否有角色-super-admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/hasRole?role=super-admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "hasRole"],
+              "query": [
+                {"key": "role", "value": "super-admin"}
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('有 super-admin 角色', function () {",
+                  "    pm.expect(pm.response.json().data).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "判断是否有角色-shop-admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/hasRole?role=shop-admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "hasRole"],
+              "query": [
+                {"key": "role", "value": "shop-admin", "description": "应无此角色"}
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('无 shop-admin 角色', function () {",
+                  "    pm.expect(pm.response.json().data).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "校验角色-super-admin（通过）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkRole?role=super-admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkRole"],
+              "query": [
+                {"key": "role", "value": "super-admin"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "校验角色-shop-admin（失败）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkRole?role=shop-admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkRole"],
+              "query": [
+                {"key": "role", "value": "shop-admin"}
+              ]
+            },
+            "description": "未配置全局异常拦截时，返回 500"
+          },
+          "response": []
+        },
+        {
+          "name": "校验角色-AND（失败）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkRoleAnd",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkRoleAnd"]
+            },
+            "description": "需要 super-admin + shop-admin 全部通过，当前无 shop-admin"
+          },
+          "response": []
+        },
+        {
+          "name": "校验角色-OR（通过）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkRoleOr",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkRoleOr"]
+            },
+            "description": "super-admin / shop-admin 任一通过即可"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OR 校验通过', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04-完整流程（按顺序跑）",
+      "item": [
+        {
+          "name": "Step1-登录",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/acc/doLogin?name={{username}}&pwd={{password}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["acc", "doLogin"],
+              "query": [
+                {"key": "name", "value": "{{username}}"},
+                {"key": "pwd", "value": "{{password}}"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step2-查看Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/acc/tokenInfo",
+              "host": ["{{baseUrl}}"],
+              "path": ["acc", "tokenInfo"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step3-权限集合",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/getPermissionList",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "getPermissionList"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step4-角色集合",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/getRoleList",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "getRoleList"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step5-权限OR校验",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkPermissionOr",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkPermissionOr"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step6-角色OR校验",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jur/checkRoleOr",
+              "host": ["{{baseUrl}}"],
+              "path": ["jur", "checkRoleOr"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step7-注销",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/acc/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["acc", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
