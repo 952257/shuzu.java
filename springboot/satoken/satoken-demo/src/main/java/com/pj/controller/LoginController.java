@@ -2,6 +2,8 @@ package com.pj.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
+import com.pj.entity.SysUser;
+import com.pj.service.SysUserService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,12 +14,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/acc/")
 public class LoginController {
 
-    // 测试登录  ---- http://localhost:8081/acc/doLogin?name=zhang&pwd=123456
+    private final SysUserService sysUserService;
+
+    public LoginController(SysUserService sysUserService) {
+        this.sysUserService = sysUserService;
+    }
+
+    // 测试登录  ---- http://localhost:8081/acc/doLogin?name=aaa&pwd=123
     @RequestMapping("doLogin")
     public SaResult doLogin(String name, String pwd) {
-        // 此处仅作模拟示例，真实项目需要从数据库中查询数据进行比对
-        if ("zhang".equals(name) && "123456".equals(pwd)) {
-            StpUtil.login(10001);
+        SysUser user = sysUserService.login(name, pwd);
+        if (user != null) {
+            StpUtil.login(user.getId());
             return SaResult.ok("登录成功");
         }
         return SaResult.error("登录失败");
@@ -35,11 +43,16 @@ public class LoginController {
         return SaResult.data(StpUtil.getTokenInfo());
     }
 
+    // 查询当前账号权限  ---- http://localhost:8081/acc/permissions
+    @RequestMapping("permissions")
+    public SaResult permissions() {
+        return SaResult.data(StpUtil.getPermissionList());
+    }
+
     // 测试注销  ---- http://localhost:8081/acc/logout
     @RequestMapping("logout")
     public SaResult logout() {
         StpUtil.logout();
         return SaResult.ok();
     }
-
 }
