@@ -23,6 +23,7 @@
         <module>springboot-docker</module>
         <module>springboot-webclient</module>
         <module>satoken</module>
+        <module>exam_demo</module>
     </modules>
 
     <properties>

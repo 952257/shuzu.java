@@ -1,0 +1,46 @@
+国家电网数据平台 — 项目说明
+================================
+
+做什么
+------
+依据《企业开发项目》《企业运维项目》两份试卷，在官方源码上完成国家电网数据平台。
+
+开发直接在本机弄（IDEA + 本机 MySQL + 本机 Redis）
+------------------------------------------------
+不要 Docker，不要 CentOS 虚拟机。运维试卷的主从/哨兵/Nginx 考试时再搞。
+
+1. 本机 MySQL 127.0.0.1:3306，账号 root / 123456。
+   Windows 双击 springboot\init-local-db.bat
+   或 Mac/Linux：bash springboot/init-local-db.sh
+   会建 blade、ry-vue，并导入官方 SQL 和台账表。
+2. 本机 Redis 127.0.0.1:6379，密码 123456。
+   若 Redis 没密码，删掉 blade-springboot 的 application-dev.yml 里 password。
+3. IDEA 运行 org.springblade.Application（JDK 17，端口 9999）。
+4. IDEA 运行 com.zhrj.DemoApplication（端口 8080，路径 /exam）。
+
+用了谁的源码（先拉再改，不另起炉灶）
+------------------------------------
+1. 考试工程：com.zhrj.DemoApplication ，目录 springboot/exam_demo
+2. 第三方：org.springblade.Application ，目录 springboot/blade-springboot
+   接口：POST /blade-auth/token 、 GET /blade-user/user-list
+
+试卷接口（注意前缀 /exam）
+------------------------
+GET  /exam/auth/token
+GET  /exam/report/export?date=yyyy-MM-dd
+POST /exam/job/sync
+
+yml 里租户 000000、账号 admin、密码 MD5、clientId saber、clientSecret saber_secret。
+远程地址写本机 127.0.0.1:9999，不要写虚拟机 IP。
+
+本机暂时没有 MySQL 时
+--------------------
+exam_demo 的 spring.profiles.active 改成 h2，文件库 data/exam。
+控制台：http://127.0.0.1:8080/exam/h2-console/
+用户 sa，密码空。连不上 Blade 时启动日志会 warn，Blade 起来后再 POST /exam/job/sync。
+
+统一密码
+--------
+本机开发：MySQL / Redis / Blade 默认 root 或 123456（见 application-dev.yml）
+运维 Docker / 虚拟机：root / 127307
+MinIO：remote_user / 0123456789.abcdefg ，bucket=demo
