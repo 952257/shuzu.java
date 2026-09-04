@@ -2,7 +2,7 @@
 spring:
   data:
     redis:
-      ##redis 单机环境配置
+      ##redis 本机单机；没设密码就把 password 整行删掉
       host: 127.0.0.1
       port: 6379
       password: 123456

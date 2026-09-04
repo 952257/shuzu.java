@@ -1,8 +1,13 @@
 
 spring:
     datasource:
-        #说明：如果没有指定useSSL=true，启动项目可能会爆红警告,环境问题
+        # 本机 MySQL（不要填虚拟机 / Docker IP）
         url: jdbc:mysql://127.0.0.1:3306/ry-vue?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
         username: root
         password: 123456
         driver-class-name: com.mysql.cj.jdbc.Driver
+    sql:
+        init:
+            mode: always
+            schema-locations: classpath:schema.sql
+            continue-on-error: true

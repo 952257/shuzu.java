@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="DemoApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="springboot_exam" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.zhrj.DemoApplication" />
+    <option name="ACTIVE_PROFILES" value="druid" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
