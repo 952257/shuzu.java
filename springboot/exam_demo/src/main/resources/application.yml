@@ -1,0 +1,70 @@
+# 开发环境配置（官方 exam_demo 保留 context-path=/exam）
+server:
+  port: 8080
+  servlet:
+    context-path: /exam
+  tomcat:
+    uri-encoding: UTF-8
+    accept-count: 1000
+    threads:
+      max: 800
+      min-spare: 100
+
+spring:
+  messages:
+    basename: i18n/messages
+  # 有 MySQL 时用 druid；本机无 MySQL 改为 h2
+  profiles:
+    active: h2
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+  devtools:
+    restart:
+      enabled: true
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+mybatis-plus:
+  configuration:
+    call-setters-on-nulls: true
+    map-underscore-to-camel-case: true
+
+# 试卷要求：租户、账号、密码、clientId/clientSecret 写在 yml
+# 第三方源码：https://gitee.com/qwqweqwe/blade-springboot.git
+# Blade 默认端口 9999；前面加 Nginx 后改为 http://localhost/blade-auth/token
+remote:
+  oauth:
+    url: http://127.0.0.1:9999/blade-auth/token
+    client-id: saber
+    client-secret: saber_secret
+    tenant-id: "000000"
+    username: admin
+    password: 21232f297a57a5a743894a0e4a801fc3
+    grant-type: password
+    type: account
+    scope: all
+  user:
+    url: http://127.0.0.1:9999/blade-user/user-list
+    page-size: 10
+
+minio:
+  enabled: true
+  endpoint: http://127.0.0.1:9000
+  access-key: remote_user
+  secret-key: 0123456789.abcdefg
+  bucket: demo
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always

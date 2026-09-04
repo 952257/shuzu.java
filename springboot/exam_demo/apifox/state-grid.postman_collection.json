@@ -1,0 +1,130 @@
+{
+  "info": {
+    "name": "国家电网数据平台 exam_demo",
+    "description": "业务接口在 exam_demo（8080，context-path=/exam）。第三方是官方 blade-springboot（9999）。baseUrl 不要末尾斜杠。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8080/exam" },
+    { "key": "bladeUrl", "value": "http://127.0.0.1:9999" },
+    { "key": "date", "value": "2026-09-04" },
+    { "key": "tenantId", "value": "000000" },
+    { "key": "username", "value": "admin" },
+    { "key": "password", "value": "21232f297a57a5a743894a0e4a801fc3" },
+    { "key": "bladeAuth", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01-获取Token（试卷接口）",
+      "item": [
+        {
+          "name": "GET /auth/token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8080/exam/auth/token",
+            "description": "打 exam_demo，不是 blade-springboot。"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('返回 accessToken', function () {",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "    pm.expect(json.data && json.data.accessToken).to.be.a('string').and.not.empty;",
+                  "});",
+                  "if (json && json.data && json.data.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02-台账同步",
+      "item": [
+        {
+          "name": "POST /job/sync",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:8080/exam/job/sync"
+          }
+        },
+        {
+          "name": "GET /report/stat",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8080/exam/report/stat?date=2026-09-04"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03-日报Word导出（试卷接口）",
+      "item": [
+        {
+          "name": "GET /report/export",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8080/exam/report/export?date=2026-09-04"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04-监控",
+      "item": [
+        {
+          "name": "健康检查",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8080/exam/actuator/health"
+          }
+        },
+        {
+          "name": "Prometheus 指标",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8080/exam/actuator/prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05-第三方blade-springboot",
+      "item": [
+        {
+          "name": "POST /blade-auth/token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Basic c2FiZXI6c2FiZXJfc2VjcmV0" },
+              { "key": "Tenant-Id", "value": "000000" }
+            ],
+            "url": "http://127.0.0.1:9999/blade-auth/token?tenantId=000000&username=admin&password=21232f297a57a5a743894a0e4a801fc3&grantType=password"
+          }
+        },
+        {
+          "name": "GET /blade-user/user-list",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Basic c2FiZXI6c2FiZXJfc2VjcmV0" },
+              { "key": "Blade-Auth", "value": "{{bladeAuth}}" },
+              { "key": "Tenant-Id", "value": "000000" },
+              { "key": "Content-Type", "value": "application/json;charset=UTF-8" }
+            ],
+            "url": "http://127.0.0.1:9999/blade-user/user-list?current=1&size=10"
+          }
+        }
+      ]
+    }
+  ]
+}
