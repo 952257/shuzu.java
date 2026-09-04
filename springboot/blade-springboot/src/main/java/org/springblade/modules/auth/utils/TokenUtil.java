@@ -110,22 +110,30 @@ public class TokenUtil {
 	 * @return 解密后的密码
 	 */
 	public static String decryptPassword(String rawPassword, String publicKey, String privateKey) {
-		// 其中有空则匹配失败
+		// 试卷约定直接传 MD5；国密 SM2 解密失败时回退原文
+		if (StringUtil.isBlank(rawPassword)) {
+			return StringPool.EMPTY;
+		}
 		if (StringUtil.isAnyBlank(publicKey, privateKey)) {
-			return StringPool.EMPTY;
+			return rawPassword;
 		}
-		// 处理部分工具类加密不带04前缀的情况
-		if (!StringUtil.startsWithIgnoreCase(rawPassword, ENCRYPT_PREFIX)) {
-			rawPassword = ENCRYPT_PREFIX + rawPassword;
+		try {
+			String payload = rawPassword;
+			if (!StringUtil.startsWithIgnoreCase(payload, ENCRYPT_PREFIX)) {
+				payload = ENCRYPT_PREFIX + payload;
+			}
+			String decryptPassword = SM2Util.decrypt(payload, privateKey);
+			if (StringUtil.isBlank(decryptPassword)) {
+				return rawPassword;
+			}
+			boolean isVerified = SM2Util.verify(decryptPassword, SM2Util.sign(decryptPassword, privateKey), publicKey);
+			if (!isVerified) {
+				return rawPassword;
+			}
+			return decryptPassword;
+		} catch (Exception ex) {
+			return rawPassword;
 		}
-		// 解密密码
-		String decryptPassword = SM2Util.decrypt(rawPassword, privateKey);
-		// 签名校验
-		boolean isVerified = SM2Util.verify(decryptPassword, SM2Util.sign(decryptPassword, privateKey), publicKey);
-		if (!isVerified) {
-			return StringPool.EMPTY;
-		}
-		return decryptPassword;
 	}
 
 }
