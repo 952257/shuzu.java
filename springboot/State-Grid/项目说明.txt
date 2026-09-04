@@ -16,3 +16,13 @@ app 启动时会立刻同步一次台账；之后每天 03:00 再跑。
   curl -s -X POST http://127.0.0.1:8080/job/sync
   curl -s "http://127.0.0.1:8080/report/stat?date=$(date +%F)"
   curl -L -o /tmp/report.docx "http://127.0.0.1:8080/report/export?date=$(date +%F)"
+
+H2 控制台（末尾斜杠不能省）：
+  http://127.0.0.1:8080/h2-console/
+
+登录：
+  Saved Settings: Generic H2 (Embedded)
+  JDBC URL: jdbc:h2:file:./data/state_grid
+  User Name: sa
+  Password: （留空）
+  点 Connect
