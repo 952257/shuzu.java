@@ -25,9 +25,10 @@ Apifox：
 H2 控制台（末尾斜杠不能省）：
   http://127.0.0.1:8080/h2-console/
 
-登录：
-  Saved Settings: Generic H2 (Embedded)
-  JDBC URL: jdbc:h2:file:./data/state_grid
+登录（不要用默认的 jdbc:h2:~/test，那是空库）：
+  JDBC URL:
+    jdbc:h2:file:/workspace/springboot/State-Grid/state-grid-app/data/state_grid;MODE=MySQL;AUTO_SERVER=TRUE
   User Name: sa
   Password: （留空）
   点 Connect
+  能看到 LOCAL_USER_LEDGER、SYNC_REPORT
