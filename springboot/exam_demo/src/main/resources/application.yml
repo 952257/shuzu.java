@@ -15,7 +15,7 @@ spring:
     basename: i18n/messages
   # 有 MySQL 时用 druid；本机无 MySQL 改为 h2
   profiles:
-    active: h2
+    active: druid
   servlet:
     multipart:
       max-file-size: 10MB

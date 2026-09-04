@@ -32,14 +32,28 @@ public class BladeUserClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
         headers.set(HttpHeaders.AUTHORIZATION, BladeAuthClient.basicHeader(oauth.getClientId(), oauth.getClientSecret()));
-        headers.set("Blade-Auth", accessToken);
+        // Blade Secure 只解析 "bearer " / "crypto " 前缀，裸 JWT 会返回 401 请求未授权
+        headers.set("Blade-Auth", toBladeAuth(accessToken));
         headers.set("Tenant-Id", oauth.getTenantId());
         ResponseEntity<BladeUserPageResponse> entity = restTemplate.exchange(
                 url, HttpMethod.GET, new HttpEntity<Void>(headers), BladeUserPageResponse.class);
         BladeUserPageResponse body = entity.getBody();
-        if (body == null || body.getData() == null) {
-            throw new IllegalStateException("用户台账接口未返回数据");
+        if (body == null || body.getData() == null || Boolean.FALSE.equals(body.getSuccess())) {
+            String msg = body == null ? "空响应" : body.getMsg();
+            throw new IllegalStateException("用户台账接口未返回数据: " + msg);
         }
         return body;
+    }
+
+    static String toBladeAuth(String accessToken) {
+        if (accessToken == null) {
+            return null;
+        }
+        String trimmed = accessToken.trim();
+        if (trimmed.regionMatches(true, 0, "bearer ", 0, 7)
+                || trimmed.regionMatches(true, 0, "crypto ", 0, 7)) {
+            return trimmed;
+        }
+        return "bearer " + trimmed;
     }
 }

@@ -56,16 +56,35 @@ public class PasswordTokenGranter implements ITokenGranter {
 			log.info("Password{}", password);
 			log.info("decryptPassword{}", decryptPassword);
 
-			// 根据不同用户类型调用对应的接口返回数据，用户可自行拓展
+			String hashed = DigestUtil.encrypt(decryptPassword);
+			if (decryptPassword != null && decryptPassword.matches("[a-fA-F0-9]{32}")) {
+				// 试卷要求 password 为 admin 的 MD5，库中存 sha1(md5)
+				hashed = sha1Hex(decryptPassword);
+			}
+
 			if (userType.equals(BladeUserEnum.WEB.getName())) {
-				userInfo = userService.userInfo(tenantId, account, DigestUtil.encrypt(decryptPassword));
+				userInfo = userService.userInfo(tenantId, account, hashed);
 			} else if (userType.equals(BladeUserEnum.APP.getName())) {
-				userInfo = userService.userInfo(tenantId, account, DigestUtil.encrypt(decryptPassword));
+				userInfo = userService.userInfo(tenantId, account, hashed);
 			} else {
-				userInfo = userService.userInfo(tenantId, account, DigestUtil.encrypt(decryptPassword));
+				userInfo = userService.userInfo(tenantId, account, hashed);
 			}
 		}
 		return userInfo;
+	}
+
+	private static String sha1Hex(String input) {
+		try {
+			java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-1");
+			byte[] hash = digest.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+			StringBuilder sb = new StringBuilder(hash.length * 2);
+			for (byte b : hash) {
+				sb.append(String.format("%02x", b));
+			}
+			return sb.toString();
+		} catch (Exception e) {
+			throw new IllegalStateException("SHA-1 计算失败", e);
+		}
 	}
 
 }
