@@ -1,0 +1,18 @@
+国家电网数据平台 — 本机启动（不启虚拟机 / 不启 Docker）
+====================================================
+
+本次按你的要求：不启动 CentOS 虚拟机，也不后台起 Docker 集群。
+只前台跑两个 Spring Boot 进程：
+
+  blade-mock        18080   模拟第三方 OAuth + 用户台账
+  state-grid-app    8080    业务程序（H2 文件库，Excel 写到 data/excel）
+
+启动顺序：先 mock，再 app。
+app 启动时会立刻同步一次台账；之后每天 03:00 再跑。
+
+验证：
+  curl -s http://127.0.0.1:18080/actuator/health   （mock 没 actuator，用下面 token）
+  curl -s http://127.0.0.1:8080/auth/token
+  curl -s -X POST http://127.0.0.1:8080/job/sync
+  curl -s "http://127.0.0.1:8080/report/stat?date=$(date +%F)"
+  curl -L -o /tmp/report.docx "http://127.0.0.1:8080/report/export?date=$(date +%F)"

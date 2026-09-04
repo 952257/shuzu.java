@@ -1,0 +1,54 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: state-grid-app
+  datasource:
+    url: jdbc:h2:file:./data/state_grid;MODE=MySQL;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      continue-on-error: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+
+remote:
+  oauth:
+    url: http://127.0.0.1:18080/blade-auth/token
+    client-id: saber
+    client-secret: saber_secret
+    tenant-id: "000000"
+    username: admin
+    password: 21232f297a57a5a743894a0e4a801fc3
+    grant-type: password
+    type: account
+    scope: all
+  user:
+    url: http://127.0.0.1:18080/blade-user/user-list
+    page-size: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
