@@ -1,0 +1,48 @@
+国家电网数据平台 — 项目说明
+================================
+
+做什么
+------
+依据《企业开发项目》《企业运维项目》两份试卷，在官方源码上完成国家电网数据平台。
+
+用了谁的源码（先拉再改，不另起炉灶）
+------------------------------------
+1. 考试工程（在此基础上写业务）：
+   git clone https://gitee.com/iocs/exam_demo.git
+   启动类：com.zhrj.DemoApplication
+   端口 8080，context-path=/exam
+
+2. 第三方 OAuth / 用户台账：
+   git clone https://gitee.com/qwqweqwe/blade-springboot.git
+   启动类：org.springblade.Application
+   端口 9999
+   已有接口：POST /blade-auth/token 、 GET /blade-user/user-list
+
+怎么做（开发）
+--------------
+1. 导入 blade-springboot 的 doc/sql/blade-saber-mysql.sql 到 MySQL 库 blade，启动 Redis，再启动 Application。
+2. 在 exam_demo 的 application.yml 填写租户 000000、账号 admin、密码 MD5、clientId saber、clientSecret saber_secret。
+3. 本工程新增：拿 Token、分页拉用户、增量写入本地表、EasyExcel 导出、MinIO 上传、每天 03:00 及启动时同步、GET /report/export 出 Word。
+4. 试卷接口（注意前缀 /exam）：
+   GET  /exam/auth/token
+   GET  /exam/report/export?date=yyyy-MM-dd
+   POST /exam/job/sync   （调试用，立刻同步）
+
+技术栈
+------
+exam_demo：Java 8、Spring Boot 2.6.4、MyBatis-Plus、Druid、EasyExcel、Apache POI、MinIO SDK、RestTemplate
+blade-springboot：JDK 17、Spring Boot 3.2.7、SpringBlade 4.1.0
+运维：Docker Compose（MySQL 主从、Redis 哨兵、Nginx、Prometheus、Grafana、MinIO）
+
+本机无 MySQL 时
+--------------
+exam_demo 的 spring.profiles.active=h2，用文件库 data/exam，控制台：
+  http://127.0.0.1:8080/exam/h2-console/
+JDBC：jdbc:h2:file:./data/exam;MODE=MySQL;AUTO_SERVER=TRUE
+用户 sa，密码空。
+
+统一密码
+--------
+root / 127307（虚拟机、Grafana、Redis、MySQL Docker）
+Blade 默认库密码见 application-dev.yml（root / 123456）
+MinIO：remote_user / 0123456789.abcdefg ，bucket=demo
