@@ -1,0 +1,81 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: state-grid-app
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/state_grid?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 127307
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 127307
+    timeout: 3000ms
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+# 远程 OAuth / 用户台账（默认直连 blade-mock；配了 Nginx 后可改成 http://127.0.0.1/blade-auth/token）
+remote:
+  oauth:
+    url: http://127.0.0.1:18080/blade-auth/token
+    client-id: saber
+    client-secret: saber_secret
+    tenant-id: "000000"
+    username: admin
+    password: 21232f297a57a5a743894a0e4a801fc3
+    grant-type: password
+    type: account
+    scope: all
+  user:
+    url: http://127.0.0.1:18080/blade-user/user-list
+    page-size: 10
+
+minio:
+  endpoint: http://127.0.0.1:9000
+  access-key: remote_user
+  secret-key: 0123456789.abcdefg
+  bucket: demo
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: nginx
+remote:
+  oauth:
+    url: http://127.0.0.1/blade-auth/token
+  user:
+    url: http://127.0.0.1/blade-user/user-list
+
+---
+spring:
+  config:
+    activate:
+      on-profile: replica
+server:
+  port: 8081

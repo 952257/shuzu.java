@@ -1,0 +1,61 @@
+Redis 哨兵模式集群（安装文档）
+==============================
+
+拓扑：1 主 + 2 从 + 3 哨兵，法定人数 quorum=2。
+密码：127307（requirepass / masterauth / sentinel auth-pass 都是这个）
+
+一、Docker 方式（已配好）
+------------------------
+
+cd springboot/State-Grid/docker
+docker compose up -d redis-master redis-replica1 redis-replica2 redis-sentinel1 redis-sentinel2 redis-sentinel3
+
+端口：
+  6379 主
+  6380 从1
+  6381 从2
+  26379 / 26380 / 26381 三个哨兵
+
+看主从：
+  docker exec -it sg-redis-master redis-cli -a 127307 INFO replication
+
+看哨兵：
+  docker exec -it sg-redis-sentinel1 redis-cli -p 26379 SENTINEL masters
+  docker exec -it sg-redis-sentinel1 redis-cli -p 26379 SENTINEL replicas mymaster
+
+故障转移演示：
+  docker stop sg-redis-master
+  等约 5 秒（down-after-milliseconds=5000）
+  docker exec -it sg-redis-sentinel1 redis-cli -p 26379 SENTINEL get-master-addr-by-name mymaster
+  会切到某个 replica。
+  docker start sg-redis-master   # 回来后变成从库
+
+Spring Boot 在 Mac 上默认直连 127.0.0.1:6379（避免哨兵在容器里返回 redis-master 主机名，宿主机解析不了）。
+如果应用也放进同一 docker 网络，可改成：
+
+spring:
+  redis:
+    password: 127307
+    sentinel:
+      master: mymaster
+      nodes: redis-sentinel1:26379,redis-sentinel2:26379,redis-sentinel3:26379
+
+二、虚拟机手工要点
+------------------
+
+三份 redis 配置：一台主、两台从（replicaof <主IP> 6379）。
+三份 sentinel 配置：
+
+  port 26379
+  sentinel monitor mymaster <主IP> 6379 2
+  sentinel auth-pass mymaster 127307
+  sentinel down-after-milliseconds mymaster 5000
+  sentinel failover-timeout mymaster 10000
+  sentinel parallel-syncs mymaster 1
+
+启动：
+  redis-server /etc/redis/redis.conf
+  redis-sentinel /etc/redis/sentinel.conf
+
+本机 48GB：每个 Redis 容器限制 128MB，三哨兵各 64MB，总共不到 1GB。
+虚拟机方案把整套 Redis 都放 vm2（6GB）即可。

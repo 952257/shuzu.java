@@ -1,0 +1,294 @@
+version: "3.8"
+
+# 本机 Mac M4 Pro 48GB：全部容器大约占用 3~4GB 内存，无需再开虚拟机。
+# 账号统一：root / 127307（MinIO 按试卷要求使用 remote_user）
+
+x-mysql-env: &mysql-env
+  MYSQL_ROOT_PASSWORD: "127307"
+
+services:
+  mysql-master:
+    image: mysql:8.0.36
+    container_name: sg-mysql-master
+    ports:
+      - "3306:3306"
+    environment:
+      <<: *mysql-env
+      MYSQL_ROOT_HOST: "%"
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    volumes:
+      - ./mysql/master.cnf:/etc/mysql/conf.d/master.cnf:ro
+      - ./mysql/00-init-repl.sql:/docker-entrypoint-initdb.d/00-init-repl.sql:ro
+      - ../sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../sql/ops-emp-dept.sql:/docker-entrypoint-initdb.d/02-ops-emp-dept.sql:ro
+      - mysql-master-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p127307"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: "1.0"
+    networks: [sg-net]
+
+  mysql-slave:
+    image: mysql:8.0.36
+    container_name: sg-mysql-slave
+    ports:
+      - "3307:3306"
+    environment:
+      <<: *mysql-env
+      MYSQL_ROOT_HOST: "%"
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    volumes:
+      - ./mysql/slave.cnf:/etc/mysql/conf.d/slave.cnf:ro
+      - mysql-slave-data:/var/lib/mysql
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p127307"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: "1.0"
+    networks: [sg-net]
+
+  mysql-replicator:
+    image: mysql:8.0.36
+    container_name: sg-mysql-replicator
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+      mysql-slave:
+        condition: service_healthy
+    volumes:
+      - ./mysql/setup-replication.sh:/setup-replication.sh:ro
+    entrypoint: ["bash", "/setup-replication.sh"]
+    networks: [sg-net]
+    restart: "no"
+
+  redis-master:
+    image: redis:7-alpine
+    container_name: sg-redis-master
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/master.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis-master-data:/data
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "127307", "ping"]
+      interval: 5s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.5"
+    networks: [sg-net]
+
+  redis-replica1:
+    image: redis:7-alpine
+    container_name: sg-redis-replica1
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./redis/replica.conf:/usr/local/etc/redis/redis.conf:ro
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--replicaof", "redis-master", "6379", "--replica-announce-ip", "127.0.0.1", "--replica-announce-port", "6380"]
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.5"
+    networks: [sg-net]
+
+  redis-replica2:
+    image: redis:7-alpine
+    container_name: sg-redis-replica2
+    ports:
+      - "6381:6379"
+    volumes:
+      - ./redis/replica.conf:/usr/local/etc/redis/redis.conf:ro
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--replicaof", "redis-master", "6379", "--replica-announce-ip", "127.0.0.1", "--replica-announce-port", "6381"]
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.5"
+    networks: [sg-net]
+
+  redis-sentinel1:
+    image: redis:7-alpine
+    container_name: sg-redis-sentinel1
+    ports:
+      - "26379:26379"
+    volumes:
+      - ./redis/sentinel.conf:/sentinel-ro/sentinel.conf:ro
+    command: ["sh", "-c", "cp /sentinel-ro/sentinel.conf /tmp/sentinel.conf && redis-sentinel /tmp/sentinel.conf"]
+    depends_on:
+      - redis-master
+      - redis-replica1
+      - redis-replica2
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    networks: [sg-net]
+
+  redis-sentinel2:
+    image: redis:7-alpine
+    container_name: sg-redis-sentinel2
+    ports:
+      - "26380:26379"
+    volumes:
+      - ./redis/sentinel.conf:/sentinel-ro/sentinel.conf:ro
+    command: ["sh", "-c", "cp /sentinel-ro/sentinel.conf /tmp/sentinel.conf && redis-sentinel /tmp/sentinel.conf"]
+    depends_on:
+      - redis-master
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    networks: [sg-net]
+
+  redis-sentinel3:
+    image: redis:7-alpine
+    container_name: sg-redis-sentinel3
+    ports:
+      - "26381:26379"
+    volumes:
+      - ./redis/sentinel.conf:/sentinel-ro/sentinel.conf:ro
+    command: ["sh", "-c", "cp /sentinel-ro/sentinel.conf /tmp/sentinel.conf && redis-sentinel /tmp/sentinel.conf"]
+    depends_on:
+      - redis-master
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    networks: [sg-net]
+
+  minio:
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    container_name: sg-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: remote_user
+      MINIO_ROOT_PASSWORD: 0123456789.abcdefg
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks: [sg-net]
+
+  minio-init:
+    image: minio/mc:RELEASE.2024-12-18T01-26-14Z
+    container_name: sg-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 8;
+      mc alias set local http://minio:9000 remote_user 0123456789.abcdefg;
+      mc mb -p local/demo;
+      echo bucket demo ready;
+      "
+    networks: [sg-net]
+    restart: "no"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: sg-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    networks: [sg-net]
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: sg-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks: [sg-net]
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: sg-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: "127307"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks: [sg-net]
+
+networks:
+  sg-net:
+    name: sg-net
+    driver: bridge
+
+volumes:
+  mysql-master-data:
+  mysql-slave-data:
+  redis-master-data:
+  minio-data:
+  prometheus-data:
+  grafana-data:
