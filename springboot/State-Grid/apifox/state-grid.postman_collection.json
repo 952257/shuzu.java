@@ -1,0 +1,174 @@
+{
+  "info": {
+    "name": "国家电网数据平台 State-Grid",
+    "description": "baseUrl 必须是 http://127.0.0.1:8080（业务应用），不要用 18080，也不要末尾斜杠。\n18080 只给「05-模拟第三方Blade」用。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8080" },
+    { "key": "mockUrl", "value": "http://127.0.0.1:18080" },
+    { "key": "date", "value": "2026-09-04" },
+    { "key": "tenantId", "value": "000000" },
+    { "key": "username", "value": "admin" },
+    { "key": "password", "value": "21232f297a57a5a743894a0e4a801fc3" },
+    { "key": "bladeAuth", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01-获取Token（试卷接口）",
+      "item": [
+        {
+          "name": "GET /auth/token 返回远程 Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8080/auth/token",
+            "description": "打业务应用 8080，不是 mock 的 18080。"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('返回 accessToken', function () {",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "    pm.expect(json.data && json.data.accessToken).to.be.a('string').and.not.empty;",
+                  "});",
+                  "if (json && json.data && json.data.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02-台账同步（调试）",
+      "item": [
+        {
+          "name": "POST /job/sync 立即同步一次",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:8080/job/sync"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('返回同步统计', function () {",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "    pm.expect(json.data.totalCount).to.be.at.least(1);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /report/stat 查看某日统计",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8080/report/stat?date=2026-09-04"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03-日报Word导出（试卷接口）",
+      "item": [
+        {
+          "name": "GET /report/export 导出 Word",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8080/report/export?date=2026-09-04"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04-监控",
+      "item": [
+        {
+          "name": "健康检查",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8080/actuator/health"
+          }
+        },
+        {
+          "name": "Prometheus 指标",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8080/actuator/prometheus"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05-模拟第三方Blade（直连 mock）",
+      "item": [
+        {
+          "name": "POST /blade-auth/token 远程OAuth",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Basic c2FiZXI6c2FiZXJfc2VjcmV0" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "url": "http://127.0.0.1:18080/blade-auth/token?tenantId=000000&username=admin&password=21232f297a57a5a743894a0e4a801fc3&grant_type=password&type=account&scope=all"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('OAuth 成功', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(json.data.accessToken).to.be.ok;",
+                  "});",
+                  "if (json && json.data && json.data.accessToken) {",
+                  "    pm.collectionVariables.set('bladeAuth', json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /blade-user/user-list 用户台账",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Basic c2FiZXI6c2FiZXJfc2VjcmV0" },
+              { "key": "Content-Type", "value": "application/json;charset=UTF-8" },
+              { "key": "Blade-Auth", "value": "{{bladeAuth}}" }
+            ],
+            "url": "http://127.0.0.1:18080/blade-user/user-list?current=1&size=10"
+          }
+        }
+      ]
+    }
+  ]
+}
