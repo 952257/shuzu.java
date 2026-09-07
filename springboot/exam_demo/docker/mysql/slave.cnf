@@ -1,0 +1,7 @@
+[mysqld]
+server-id=2
+gtid-mode=ON
+enforce-gtid-consistency=ON
+read-only=ON
+relay-log=relay-bin
+character-set-server=utf8mb4

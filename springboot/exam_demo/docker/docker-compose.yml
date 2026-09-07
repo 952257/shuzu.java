@@ -1,0 +1,119 @@
+# 企业运维：MySQL 主从、Redis 哨兵、Nginx、Prometheus、Grafana、MinIO
+# 本机已有 MySQL 9.7.1 占用 3306，因此主库映射 3307、从库映射 3308
+# 本机 Redis 占用 6379，Compose 里 Redis 映射 16379 / 16380
+# 本机 MinIO 占用 9000/9001 时不要启动 compose 的 minio 服务
+
+services:
+  mysql-master:
+    image: mysql:8.0
+    container_name: sg-mysql-master
+    command: ["--server-id=1", "--log-bin=mysql-bin", "--binlog-format=ROW", "--gtid-mode=ON", "--enforce-gtid-consistency=ON"]
+    environment:
+      MYSQL_ROOT_PASSWORD: hjx127307
+      MYSQL_DATABASE: state_grid
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql/master.cnf:/etc/mysql/conf.d/master.cnf:ro
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-phjx127307"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  mysql-slave:
+    image: mysql:8.0
+    container_name: sg-mysql-slave
+    command: ["--server-id=2", "--gtid-mode=ON", "--enforce-gtid-consistency=ON", "--read-only=ON"]
+    environment:
+      MYSQL_ROOT_PASSWORD: hjx127307
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./mysql/slave.cnf:/etc/mysql/conf.d/slave.cnf:ro
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+
+  redis-master:
+    image: redis:7-alpine
+    container_name: sg-redis-master
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/master.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - "16379:6379"
+
+  redis-replica:
+    image: redis:7-alpine
+    container_name: sg-redis-replica
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/replica.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - "16380:6379"
+    depends_on:
+      - redis-master
+
+  redis-sentinel:
+    image: redis:7-alpine
+    container_name: sg-redis-sentinel
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - ./redis/sentinel.conf:/usr/local/etc/redis/sentinel.conf:ro
+    ports:
+      - "26379:26379"
+    depends_on:
+      - redis-master
+      - redis-replica
+
+  minio:
+    image: minio/minio:latest
+    container_name: sg-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: remote_user
+      MINIO_ROOT_PASSWORD: 0123456789.abcdefg
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: sg-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: sg-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana:11.1.4
+    container_name: sg-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: 127307
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+volumes:
+  minio-data:

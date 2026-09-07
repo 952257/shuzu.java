@@ -1,0 +1,112 @@
+{
+  "info": {
+    "name": "国家电网数据平台",
+    "description": "Apifox 一键导入：导入本 Collection 后再导入同目录 environment。右上角环境必须选「本地」，不要选「本地 Mock」。先跑 1 再跑 2。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. 获取 Token",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "var json = pm.response.json();",
+            "var token = null;",
+            "if (json && json.data && json.data.data && json.data.data.accessToken) { token = json.data.data.accessToken; }",
+            "else if (json && json.data && json.data.accessToken) { token = json.data.accessToken; }",
+            "if (token) { pm.environment.set('accessToken', token); }"
+          ]
+        }
+      }],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{examBaseUrl}}/auth/token",
+        "description": "课题 GET:/auth/token"
+      }
+    },
+    {
+      "name": "2. 导出台账统计报告 Word",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{examBaseUrl}}/report/export?date={{reportDate}}",
+          "host": ["{{examBaseUrl}}"],
+          "path": ["report", "export"],
+          "query": [{ "key": "date", "value": "{{reportDate}}" }]
+        }
+      }
+    },
+    {
+      "name": "3. 健康检查",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{examBaseUrl}}/actuator/health"
+      }
+    },
+    {
+      "name": "4. Prometheus 指标",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{examBaseUrl}}/actuator/prometheus"
+      }
+    },
+    {
+      "name": "5. 远程 Blade 获取 Token",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "var json = pm.response.json();",
+            "if (json && json.data && json.data.accessToken) { pm.environment.set('accessToken', json.data.accessToken); }"
+          ]
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Basic {{bladeBasic}}" },
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "tenantId", "value": "000000" },
+            { "key": "username", "value": "admin" },
+            { "key": "password", "value": "21232f297a57a5a743894a0e4a801fc3" },
+            { "key": "grant_type", "value": "password" },
+            { "key": "type", "value": "account" },
+            { "key": "scope", "value": "all" }
+          ]
+        },
+        "url": "{{bladeBaseUrl}}/blade-auth/token"
+      }
+    },
+    {
+      "name": "6. 远程用户台账分页",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Basic {{bladeBasic}}" },
+          { "key": "Content-Type", "value": "application/json;charset=UTF-8" },
+          { "key": "Blade-Auth", "value": "bearer {{accessToken}}" }
+        ],
+        "url": {
+          "raw": "{{bladeBaseUrl}}/blade-user/user-list?current=1&size=10",
+          "host": ["{{bladeBaseUrl}}"],
+          "path": ["blade-user", "user-list"],
+          "query": [
+            { "key": "current", "value": "1" },
+            { "key": "size", "value": "10" }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+OFFICIAL_SOURCE=https://gitee.com/iocs/exam_demo.git
+THIRD_PARTY=https://gitee.com/qwqweqwe/blade-springboot.git
