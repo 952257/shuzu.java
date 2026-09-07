@@ -34,6 +34,7 @@
         <module name="springboot-sakila-mybatisplus" />
         <module name="springboot-others (1)" />
         <module name="springboot-mybatis" />
+        <module name="springboot_exam" />
         <module name="Atm" />
         <module name="order-service" />
         <module name="satoken-demo" />
@@ -85,6 +86,7 @@
       <module name="springboot-sakila" options="-parameters" />
       <module name="springboot-sakila-mybatisplus" options="-parameters" />
       <module name="springboot-web" options="-parameters" />
+      <module name="springboot_exam" options="-parameters" />
       <module name="webclient-client" options="-parameters" />
       <module name="webclient-mock" options="-parameters" />
     </option>
