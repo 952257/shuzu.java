@@ -24,6 +24,7 @@
         <module>springboot-webclient</module>
         <module>satoken</module>
         <module>exam_demo</module>
+        <module>blade-springboot</module>
     </modules>
 
     <properties>
