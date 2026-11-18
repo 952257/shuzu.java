@@ -1,9 +1,10 @@
 # TT 小区物业：MySQL + 后端 + 前端(Nginx) 一键 Docker 部署
-# 使用：cd springboot/tt-deploy && docker compose up -d --build
+# 使用：cd springboot/tt-deploy && ./up.sh
+# 必须先有 .env（up.sh 会生成随机 MYSQL_ROOT_PASSWORD / TT_JWT_SECRET）
 #
 # Web 入口（前端 + /app 反代）：http://localhost:8080
-# 后端直连（可选）：http://localhost:8088
-# MySQL（可选）：localhost:3309
+# 后端直连（仅本机回环）：http://127.0.0.1:8088
+# MySQL（仅本机回环）：127.0.0.1:3309
 
 services:
   mysql:
@@ -11,11 +12,12 @@ services:
     container_name: tt-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hjx127307}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
       MYSQL_DATABASE: TT
       TZ: Asia/Shanghai
+    # 仅绑定回环，避免默认把数据库暴露到 0.0.0.0
     ports:
-      - "${MYSQL_HOST_PORT:-3309}:3306"
+      - "127.0.0.1:${MYSQL_HOST_PORT:-3309}:3306"
     volumes:
       - tt-mysql-data:/var/lib/mysql
       - ./mysql/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -25,7 +27,7 @@ services:
       - --collation-server=utf8mb4_general_ci
       - --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-hjx127307}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 30
@@ -46,11 +48,12 @@ services:
       MYSQL_PORT: "3306"
       MYSQL_DB: TT
       MYSQL_USER: root
-      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hjx127307}
-      TT_JWT_SECRET: ${TT_JWT_SECRET:-tt-homecommunity-secret-key-2026}
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      TT_JWT_SECRET: ${TT_JWT_SECRET:?Set TT_JWT_SECRET in .env}
       TZ: Asia/Shanghai
+    # API 仅本机调试用；对外请走 Nginx :8080 的 /app 反代
     ports:
-      - "${BACKEND_HOST_PORT:-8088}:8088"
+      - "127.0.0.1:${BACKEND_HOST_PORT:-8088}:8088"
 
   frontend:
     build:
@@ -62,7 +65,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "${WEB_HOST_PORT:-8080}:80"
+      - "${WEB_BIND_ADDRESS:-0.0.0.0}:${WEB_HOST_PORT:-8080}:80"
 
 volumes:
   tt-mysql-data:
