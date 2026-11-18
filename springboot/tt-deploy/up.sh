@@ -80,14 +80,19 @@ ensure_env
 
 # 部分环境开启 br_netfilter 后，同 bridge 容器互访会被 iptables 干扰。
 # 若出现 backend 连不上 mysql、前端反代 504，可执行：
-#   sudo sysctl -w net.bridge.bridge-nf-call-iptables=0 net.bridge.bridge-nf-call-ip6tables=0
-if [ "$(id -u)" = "0" ] || command -v sudo >/dev/null 2>&1; then
-  if [ -r /proc/sys/net/bridge/bridge-nf-call-iptables ]; then
+#   sysctl -w net.bridge.bridge-nf-call-iptables=0 net.bridge.bridge-nf-call-ip6tables=0
+if [ -r /proc/sys/net/bridge/bridge-nf-call-iptables ]; then
+  if [ "$(id -u)" = "0" ]; then
+    sysctl -w net.bridge.bridge-nf-call-iptables=0 net.bridge.bridge-nf-call-ip6tables=0 >/dev/null 2>&1 || true
+  elif command -v sudo >/dev/null 2>&1; then
     sudo sysctl -w net.bridge.bridge-nf-call-iptables=0 net.bridge.bridge-nf-call-ip6tables=0 >/dev/null 2>&1 || true
   fi
 fi
 
 $COMPOSE up -d --build
+# backend 重建后确保前端进程拿到最新编排状态（nginx 已用 Docker DNS 动态解析）
+$COMPOSE up -d --no-deps frontend >/dev/null 2>&1 || true
+
 echo ""
 echo "已启动："
 echo "  前端 Web : http://localhost:${WEB_HOST_PORT:-8080}"
